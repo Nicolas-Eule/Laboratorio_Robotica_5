@@ -109,11 +109,21 @@ class PincherController(Node):
         # Timer para publicar joint states
         self.joint_state_timer = self.create_timer(0.1, self.publish_joint_states)  # 10 Hz
         
-        # Posiciones actuales de las articulaciones (en radianes)
-        self.current_joint_positions = [0.0] * 5  # Para 5 articulaciones
+        # Posiciones actuales de las articulaciones (en radianes / metros)
+        # Mantén el tamaño sincronizado con el número de motores (dxl_ids)
+        self.current_joint_positions = [0.0] * 5  # Para 5 articulaciones / ejes
         
-        # Mapeo de IDs de motor a nombres de articulaciones
-        self.joint_names = ['waist', 'shoulder', 'elbow', 'wrist', 'gripper']
+        # Mapeo de IDs de motor a nombres de articulaciones del URDF de
+        # `phantomx_pincher_description/urdf/phantomx_pincher.urdf`
+        # Estos nombres DEBEN coincidir con los joints que publica
+        # robot_state_publisher para que RViz pueda animar el modelo.
+        self.joint_names = [
+            'phantomx_pincher_arm_shoulder_pan_joint',
+            'phantomx_pincher_arm_shoulder_lift_joint',
+            'phantomx_pincher_arm_elbow_flex_joint',
+            'phantomx_pincher_arm_wrist_flex_joint',
+            'phantomx_pincher_gripper_finger1_joint',  # usamos el dedo 1 como gripper
+        ]
 
         self.joint_sign = {
             1:  1,   
@@ -151,14 +161,35 @@ class PincherController(Node):
                 self.get_logger().error(f'Error configurando motor {dxl_id}: {str(e)}')
 
     def dxl_to_radians(self, dxl_value):
-        """Convierte valor Dynamixel (0-4095) a radianes (-pi a pi)"""
-        # Para PhantomX Pincher: 0 = -150°, 2048 = 0°, 4095 = 150°
-        # Convertimos a radianes: -2.618 a 2.618 rad
-        return (dxl_value - 2048) * (2.618 / 2048.0)
+        """Convierte valor Dynamixel a radianes (-2.618 a 2.618 aprox.).
+
+        - Para AX-12 / AX compatibles (USE_XL430 = False):
+          rango 0‑1023, centro en ~512 ⇒ 0 rad en 512.
+        - Para XL430 (USE_XL430 = True):
+          rango 0‑4095, centro en ~2048 ⇒ 0 rad en 2048.
+
+        Esta función SOLO afecta a lo que ve RViz (joint_states),
+        no a los comandos que se envían al motor físico.
+        """
+        if USE_XL430:
+            center = 2048.0
+            scale = 2.618 / 2048.0
+        else:
+            center = 512.0
+            scale = 2.618 / 512.0
+
+        return (dxl_value - center) * scale
 
     def radians_to_dxl(self, radians):
-        """Convierte radianes a valor Dynamixel (0-4095)"""
-        return int(radians * (2048.0 / 2.618) + 2048)
+        """Convierte radianes a valor Dynamixel."""
+        if USE_XL430:
+            center = 2048.0
+            inv_scale = 2048.0 / 2.618
+        else:
+            center = 512.0
+            inv_scale = 512.0 / 2.618
+
+        return int(radians * inv_scale + center)
 
     def publish_joint_states(self):
         """Publica el estado de las articulaciones para RViz"""
@@ -557,8 +588,8 @@ Características:
     def launch_rviz(self):
         """Lanza robot_state_publisher + RViz usando ros2 launch"""
         try:
-            # Lanzar el launch file: pincher_description/display.launch.py
-            cmd = ["ros2", "launch", "pincher_description", "display.launch.py"]
+            # Lanzar el launch file: pincher_description/view.launch.py
+            cmd = ["ros2", "launch", "phantomx_pincher_description", "view.launch.py"]
 
             def run_rviz():
                 # Este proceso levanta robot_state_publisher + rviz2
@@ -574,7 +605,7 @@ Características:
             self.rviz_btn.config(state=tk.DISABLED, bg="#cccccc")
             self.stop_rviz_btn.config(state=tk.NORMAL, bg="#f44336")
             self.rviz_status_label.config(text="RViz + robot_state_publisher ejecutándose", fg="green")
-            self.status_label.config(text="Lanzado display.launch.py (RViz + modelo)")
+            self.status_label.config(text="Lanzado view.launch.py (RViz + modelo)")
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo lanzar RViz: {str(e)}")
             self.rviz_status_label.config(text=f"Error: {str(e)}", fg="red")
