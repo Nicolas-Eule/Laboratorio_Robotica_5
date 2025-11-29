@@ -588,8 +588,8 @@ Características:
     def launch_rviz(self):
         """Lanza robot_state_publisher + RViz usando ros2 launch"""
         try:
-            # Lanzar el launch file: pincher_description/display.launch.py
-            cmd = ["ros2", "launch", "phantomx_pincher_description", "display.launch.py"]
+            # Lanzar el launch file: pincher_description/view.launch.py
+            cmd = ["ros2", "launch", "phantomx_pincher_description", "view.launch.py"]
 
             def run_rviz():
                 # Este proceso levanta robot_state_publisher + rviz2
@@ -605,7 +605,7 @@ Características:
             self.rviz_btn.config(state=tk.DISABLED, bg="#cccccc")
             self.stop_rviz_btn.config(state=tk.NORMAL, bg="#f44336")
             self.rviz_status_label.config(text="RViz + robot_state_publisher ejecutándose", fg="green")
-            self.status_label.config(text="Lanzado display.launch.py (RViz + modelo)")
+            self.status_label.config(text="Lanzado view.launch.py (RViz + modelo)")
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo lanzar RViz: {str(e)}")
             self.rviz_status_label.config(text=f"Error: {str(e)}", fg="red")
