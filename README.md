@@ -1,20 +1,20 @@
 <!-- ✦✦✦ FUTURE IS AUTOMATED ✦✦✦ -->
-<!-- Banner superior “neón” -->
+<!-- Banner superior "neón" -->
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&height=140&color=0:04041A,50:14213D,100:0A4D68&text=Laboratorio%205%20-%20Pincher%20Phantom%20X100%20-%20ROS%20Humble%20-%20RVIZ&fontColor=E0FBFC&fontAlign=50&fontAlignY=30&desc=Control%20y%20Conexi%C3%B3n%20con%20Python&descAlign=50&descAlignY=60" alt="header" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&height=140&color=0:04041A,50:14213D,100:0A4D68&text=Laboratorio%205%20-%20Pincher%20Phantom%20X100%20-%20ROS%20Humble%20-%20RVIZ&fontColor=E0FBFC&fontAlign=50&fontAlignY=30&desc=Control%20y%20Conexi%C3%B3n%20con%20Python&descAlign=50&descAlignY=60" alt="header" style="width: 100%; height: auto; max-width: 100%; display: block;" />
 </p>
 
 <h1 align="center">🤖 LABORATORIO 5 – PINCHER PHANTOM X100 - ROS HUMBLE - RVIZ</h1>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Ros%202-Humble-blue?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Dynamixel%20AX-12-green?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Phantom%20X-100-red?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Ros%202-Humble-blue?style=for-the-badge" alt="ROS 2 Humble" style="display: inline-block; margin: 5px;" />
+  <img src="https://img.shields.io/badge/Dynamixel%20AX-12-green?style=for-the-badge" alt="Dynamixel AX-12" style="display: inline-block; margin: 5px;" />
+  <img src="https://img.shields.io/badge/Phantom%20X-100-red?style=for-the-badge" alt="Phantom X-100" style="display: inline-block; margin: 5px;" />
 </p>
 
 <!-- Línea de texto mecanografiado (animado) -->
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=20&pause=1200&duration=3500&color=00E5FF&center=true&vCenter=true&lines=Pincher+Phantom+X100+%E2%80%A2+ROS+2+Humble+%E2%80%A2+RVIZ;Control+de+Articulaciones+%E2%80%A2+Servicios+%E2%80%A2+Conexi%C3%B3n+con+Python" alt="typing">
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=20&pause=1200&duration=3500&color=00E5FF&center=true&vCenter=true&lines=Pincher+Phantom+X100+%E2%80%A2+ROS+2+Humble+%E2%80%A2+RVIZ;Control+de+Articulaciones+%E2%80%A2+Servicios+%E2%80%A2+Conexi%C3%B3n+con+Python" alt="typing" style="width: 100%; max-width: 800px; height: auto; display: block; margin: 0 auto;" />
 </p>
 
 ---
@@ -32,37 +32,37 @@ Se incluyen tópicos de movimiento para las articulaciones, la conexión con los
 
 <!-- Encabezado: Integrantes -->
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=800&size=22&duration=2000&pause=800&color=00E5FF&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Integrantes%3A" alt="Integrantes">
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=800&size=22&duration=2000&pause=800&color=00E5FF&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Integrantes%3A" alt="Integrantes" style="width: 100%; max-width: 1000px; height: auto; display: block; margin: 10px auto;" />
 </p>
 
 <!-- Nombre 1 -->
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=7F5AF0&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Nombre%20Integrante%201%20-%20correo%40unal.edu.co" alt="Integrante 1">
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=7F5AF0&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Nombre%20Integrante%201%20-%20correo%40unal.edu.co" alt="Integrante 1" style="width: 100%; max-width: 1000px; height: auto; display: block; margin: 5px auto;" />
 </p>
 
 <!-- Nombre 2 -->
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=7F5AF0&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Nombre%20Integrante%202%20-%20correo%40unal.edu.co" alt="Integrante 2">
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=7F5AF0&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Nombre%20Integrante%202%20-%20correo%40unal.edu.co" alt="Integrante 2" style="width: 100%; max-width: 1000px; height: auto; display: block; margin: 5px auto;" />
 </p>
 
 <!-- Nombre 3 -->
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=7F5AF0&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Nombre%20Integrante%203%20-%20correo%40unal.edu.co" alt="Integrante 3">
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=7F5AF0&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Nombre%20Integrante%203%20-%20correo%40unal.edu.co" alt="Integrante 3" style="width: 100%; max-width: 1000px; height: auto; display: block; margin: 5px auto;" />
 </p>
 
 <!-- Encabezado: Docentes -->
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=800&size=22&duration=2000&pause=800&color=00E5FF&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Docentes%3A" alt="Docentes">
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=800&size=22&duration=2000&pause=800&color=00E5FF&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Docentes%3A" alt="Docentes" style="width: 100%; max-width: 1000px; height: auto; display: block; margin: 10px auto;" />
 </p>
 
 <!-- Docente 1 -->
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=39D353&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Nombre%20Docente%201%20-%20correo%40unal.edu.co" alt="Docente 1">
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=39D353&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Nombre%20Docente%201%20-%20correo%40unal.edu.co" alt="Docente 1" style="width: 100%; max-width: 1000px; height: auto; display: block; margin: 5px auto;" />
 </p>
 
 <!-- Docente 2 -->
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=39D353&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Nombre%20Docente%202%20-%20correo%40unal.edu.co" alt="Docente 2">
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=39D353&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Nombre%20Docente%202%20-%20correo%40unal.edu.co" alt="Docente 2" style="width: 100%; max-width: 1000px; height: auto; display: block; margin: 5px auto;" />
 </p>
 
 <!-- ===== FIN BLOQUE ANIMACIONES EQUIPO ===== -->
