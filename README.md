@@ -1,25 +1,30 @@
 <!-- ✦✦✦ FUTURE IS AUTOMATED ✦✦✦ -->
+
+<div align="center">
+
 <!-- Banner superior "neón" -->
-<p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&height=140&color=0:04041A,50:14213D,100:0A4D68&text=Laboratorio%205%20-%20Pincher%20Phantom%20X100%20-%20ROS%20Humble%20-%20RVIZ&fontColor=E0FBFC&fontAlign=50&fontAlignY=30&desc=Control%20y%20Conexi%C3%B3n%20con%20Python&descAlign=50&descAlignY=60" alt="header" style="width: 100%; height: auto; max-width: 100%; display: block;" />
-</p>
+<img src="https://capsule-render.vercel.app/api?type=waving&height=200&color=0:04041A,50:14213D,100:0A4D68&text=Laboratorio%205&fontColor=E0FBFC&fontSize=60&fontAlign=50&fontAlignY=35&desc=Pincher%20Phantom%20X100%20•%20ROS%20Humble%20•%20RVIZ%20•%20Control%20y%20Conexión%20con%20Python&descSize=20&descAlign=50&descAlignY=55" width="100%" />
 
-<h1 align="center">🤖 LABORATORIO 5 – PINCHER PHANTOM X100 - ROS HUMBLE - RVIZ</h1>
+<br/>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Ros%202-Humble-blue?style=for-the-badge" alt="ROS 2 Humble" style="display: inline-block; margin: 5px;" />
-  <img src="https://img.shields.io/badge/Dynamixel%20AX-12-green?style=for-the-badge" alt="Dynamixel AX-12" style="display: inline-block; margin: 5px;" />
-  <img src="https://img.shields.io/badge/Phantom%20X-100-red?style=for-the-badge" alt="Phantom X-100" style="display: inline-block; margin: 5px;" />
-</p>
+# 🤖 LABORATORIO 5 – PINCHER PHANTOM X100 - ROS HUMBLE - RVIZ
+
+<br/>
+
+![ROS 2 Humble](https://img.shields.io/badge/ROS%202-Humble-blue?style=for-the-badge)
+![Dynamixel AX-12](https://img.shields.io/badge/Dynamixel%20AX-12-green?style=for-the-badge)
+![Phantom X-100](https://img.shields.io/badge/Phantom%20X-100-red?style=for-the-badge)
+
+<br/>
 
 <!-- Línea de texto mecanografiado (animado) -->
-<p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=20&pause=1200&duration=3500&color=00E5FF&center=true&vCenter=true&lines=Pincher+Phantom+X100+%E2%80%A2+ROS+2+Humble+%E2%80%A2+RVIZ;Control+de+Articulaciones+%E2%80%A2+Servicios+%E2%80%A2+Conexi%C3%B3n+con+Python" alt="typing" style="width: 100%; max-width: 800px; height: auto; display: block; margin: 0 auto;" />
-</p>
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=24&pause=1200&duration=3500&color=00E5FF&center=true&vCenter=true&width=1200&height=60&lines=Pincher+Phantom+X100+•+ROS+2+Humble+•+RVIZ;Control+de+Articulaciones+•+Servicios+•+Conexión+con+Python" width="100%" />
+
+</div>
 
 ---
 
-### 🛰️ Descripción general
+## 🛰️ Descripción general
 
 Este repositorio implementa el **Laboratorio No. 5** de *Robótica 2025-II*: control y conexión del robot **Phantom X100** utilizando **ROS 2 Humble** y **RVIZ**.  
 Se incluyen tópicos de movimiento para las articulaciones, la conexión con los servomotores Dynamixel AX-12, y el control mediante Python para manipular el robot en RVIZ.
@@ -28,44 +33,31 @@ Se incluyen tópicos de movimiento para las articulaciones, la conexión con los
 
 ## 🧑‍🚀 Equipo
 
-<!-- ===== INICIO BLOQUE ANIMACIONES EQUIPO (una animación por línea) ===== -->
+<div align="center">
 
-<!-- Encabezado: Integrantes -->
-<p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=800&size=22&duration=2000&pause=800&color=00E5FF&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Integrantes%3A" alt="Integrantes" style="width: 100%; max-width: 1000px; height: auto; display: block; margin: 10px auto;" />
-</p>
+<!-- ===== INICIO BLOQUE ANIMACIONES EQUIPO ===== -->
 
-<!-- Nombre 1 -->
-<p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=7F5AF0&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Nombre%20Integrante%201%20-%20correo%40unal.edu.co" alt="Integrante 1" style="width: 100%; max-width: 1000px; height: auto; display: block; margin: 5px auto;" />
-</p>
+### Integrantes
 
-<!-- Nombre 2 -->
-<p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=7F5AF0&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Nombre%20Integrante%202%20-%20correo%40unal.edu.co" alt="Integrante 2" style="width: 100%; max-width: 1000px; height: auto; display: block; margin: 5px auto;" />
-</p>
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=7F5AF0&center=true&vCenter=true&width=800&height=50&lines=👤+Nombre+Integrante+1+-+correo@unal.edu.co" width="100%" />
 
-<!-- Nombre 3 -->
-<p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=7F5AF0&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Nombre%20Integrante%203%20-%20correo%40unal.edu.co" alt="Integrante 3" style="width: 100%; max-width: 1000px; height: auto; display: block; margin: 5px auto;" />
-</p>
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=7F5AF0&center=true&vCenter=true&width=800&height=50&lines=👤+Nombre+Integrante+2+-+correo@unal.edu.co" width="100%" />
 
-<!-- Encabezado: Docentes -->
-<p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=800&size=22&duration=2000&pause=800&color=00E5FF&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Docentes%3A" alt="Docentes" style="width: 100%; max-width: 1000px; height: auto; display: block; margin: 10px auto;" />
-</p>
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=7F5AF0&center=true&vCenter=true&width=800&height=50&lines=👤+Nombre+Integrante+3+-+correo@unal.edu.co" width="100%" />
 
-<!-- Docente 1 -->
-<p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=39D353&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Nombre%20Docente%201%20-%20correo%40unal.edu.co" alt="Docente 1" style="width: 100%; max-width: 1000px; height: auto; display: block; margin: 5px auto;" />
-</p>
+<br/>
 
-<!-- Docente 2 -->
-<p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=39D353&center=true&vCenter=true&width=1000&repeat=true&v=1&lines=Nombre%20Docente%202%20-%20correo%40unal.edu.co" alt="Docente 2" style="width: 100%; max-width: 1000px; height: auto; display: block; margin: 5px auto;" />
-</p>
+### Docentes
+
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=39D353&center=true&vCenter=true&width=800&height=50&lines=👨‍🏫+Nombre+Docente+1+-+correo@unal.edu.co" width="100%" />
+
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2400&pause=600&color=39D353&center=true&vCenter=true&width=800&height=50&lines=👨‍🏫+Nombre+Docente+2+-+correo@unal.edu.co" width="100%" />
 
 <!-- ===== FIN BLOQUE ANIMACIONES EQUIPO ===== -->
+
+</div>
+
+---
 
 
 
