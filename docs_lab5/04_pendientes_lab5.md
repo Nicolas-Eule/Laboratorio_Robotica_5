@@ -16,24 +16,26 @@ Este documento resume **qué falta por implementar** para completar el Lab 05 co
 
 ## 2. Scripts ROS 2 en espacio articular
 
-- [ ] **Script 1 – Movimiento secuencial HOME → pose objetivo**
-  - Nodo ROS 2 en Python.
-  - Realizar el movimiento desde HOME hasta una configuración objetivo **por articulación**, en el orden:
-    - base → shoulder → elbow → wrist (y gripper si aplica).
-  - Incluir pequeñas esperas entre movimientos de cada articulación para que se vea el movimiento escalonado.
+- [x] **Script 1 – Movimiento secuencial HOME → pose objetivo**
+  - Implementado dentro de `pincher_control/control_servo.py` como parte de la GUI.
+  - Movimiento secuencial **por articulación** usando botones de poses predefinidas:
+    - HOME (retorno secuencial extremo → base).
+    - Pose 1 y Pose 2 (movimiento secuencial base → extremo).
+  - Incluye esperas entre cada articulación para que el movimiento se vea claramente escalonado.
 
-- [ ] **Script 2 – Publicación de comandos articulares en grados**
-  - Publicar comandos articulares en **grados**, convirtiendo internamente a radianes/ticks según corresponda.
-  - **Validar límites articulares** (según Xacro/URDF) antes de enviar los comandos.
-  - Integrarse con:
-    - `pincher_control/control_servo.py`, o
-    - `pincher_control/follow_joint_trajectory_node.py`, o
-    - el nodo/tema de control articular que se use en el laboratorio.
+- [x] **Script 2 – Publicación de comandos articulares en grados**
+  - Funcionalidad cubierta por `pincher_control/control_servo.py`:
+    - Sliders y campos numéricos trabajan en **grados** respecto a HOME.
+    - Conversión interna a ticks Dynamixel mediante `degrees_to_dxl`.
+  - **Validación de límites articulares** implementada con rangos \([-150°, 150°]\) para todas las articulaciones.
+  - Integrado directamente con el nodo de control articular (`PincherController`) que envía los comandos a los motores físicos.
 
-- [ ] **Script 3 – Lectura de ángulos articulares en grados**
-  - Suscribirse a `/joint_states` (o al nodo que publique el estado articular).
-  - Calcular y mostrar/imprimir los **5 ángulos en grados respecto a HOME**.
-  - Dejar claro en la salida cuál es el orden de las articulaciones.
+- [x] **Script 3 – Lectura de ángulos articulares en grados**
+  - Implementado como nodo ROS 2 en `pincher_control/joint_angles_degrees.py`.
+  - Se suscribe a `/joint_states` y convierte las posiciones articulares a **grados respecto a HOME**.
+  - Muestra en consola los **5 ángulos en grados** en el orden:
+    - 1: base, 2: shoulder, 3: elbow, 4: wrist, 5: gripper.
+  - Deja explícito el mapeo nombre-de-joint ↔ índice en el log de inicio del nodo.
 
 ---
 
@@ -58,10 +60,12 @@ Este documento resume **qué falta por implementar** para completar el Lab 05 co
   - Añadir información del **grupo** (nombres de integrantes, logos, etc.) en la ventana principal o en una pestaña “Acerca de”.
 
 - [ ] **Botones para poses predefinidas**
-  - Definir al menos **5 poses** relevantes (por ejemplo, HOME y 4 poses de trabajo).
-  - Añadir botones a la GUI para:
-    - Enviar cada una de esas poses al robot en espacio articular.
-    - Mostrar el nombre o descripción de cada pose.
+  - Actualmente implementadas en `control_servo.py`:
+    - Pose HOME secuencial (extremo → base).
+    - Pose 1 y Pose 2 secuenciales (base → extremo), definidas en grados.
+  - Pendiente:
+    - Definir al menos **2 poses adicionales** para alcanzar un mínimo de 5 poses relevantes.
+    - Actualizar la GUI para mostrar claramente el nombre/descrición de cada pose (más allá del botón).
 
 - [ ] **Pestaña de control en espacio de la tarea**
   - Crear una nueva pestaña con sliders o campos numéricos para:
