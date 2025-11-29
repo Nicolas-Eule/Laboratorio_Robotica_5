@@ -588,8 +588,8 @@ Características:
     def launch_rviz(self):
         """Lanza robot_state_publisher + RViz usando ros2 launch"""
         try:
-            # Lanzar el launch file: pincher_description/view.launch.py
-            cmd = ["ros2", "launch", "phantomx_pincher_description", "view.launch.py"]
+            # Lanzar el launch file: pincher_description/display.launch.py
+            cmd = ["ros2", "launch", "phantomx_pincher_description", "display.launch.py"]
 
             def run_rviz():
                 # Este proceso levanta robot_state_publisher + rviz2
@@ -863,4 +863,3 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-
