@@ -68,6 +68,8 @@ Se incluyen tópicos de movimiento para las articulaciones, la conexión con los
 <!-- ===== FIN BLOQUE ANIMACIONES EQUIPO ===== -->
 
 
+
+
 # Laboratorio 5 - Pincher Phantom X100 - ROS Humble - RVIZ
 
 ## Objetivos
