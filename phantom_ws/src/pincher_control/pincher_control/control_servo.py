@@ -82,7 +82,7 @@ class PincherController(Node):
         self.declare_parameter('goal_positions', [DEFAULT_GOAL] * 5)
         self.declare_parameter('moving_speed', 100)
         self.declare_parameter('torque_limit', 800)
-
+        
         # Obtener parámetros
         port_name = self.get_parameter('port').value
         baudrate = self.get_parameter('baudrate').value
@@ -90,6 +90,23 @@ class PincherController(Node):
         goal_positions = self.get_parameter('goal_positions').value
         moving_speed = int(self.get_parameter('moving_speed').value)
         torque_limit = int(self.get_parameter('torque_limit').value)
+
+        # Mapeo de IDs de motor a nombres de articulaciones del URDF
+        self.joint_names = [
+            'phantomx_pincher_arm_shoulder_pan_joint',
+            'phantomx_pincher_arm_shoulder_lift_joint',
+            'phantomx_pincher_arm_elbow_flex_joint',
+            'phantomx_pincher_arm_wrist_flex_joint',
+            'phantomx_pincher_gripper_finger1_joint',  # usamos el dedo 1 como gripper
+        ]
+
+        self.joint_sign = {
+            1:  1,
+            2: -1,
+            3: -1,
+            4: -1,
+            5:  1,
+        }
 
         # Inicializar comunicación
         self.port = PortHandler(port_name)
@@ -106,6 +123,10 @@ class PincherController(Node):
 
         self.packet = PacketHandler(PROTOCOL_VERSION)
         
+        # Posiciones actuales de las articulaciones (en radianes / metros)
+        # Mantén el tamaño sincronizado con el número de motores (dxl_ids)
+        self.current_joint_positions = [0.0] * 5  # Para 5 articulaciones / ejes
+
         # Estado de emergencia
         self.emergency_stop_activated = False
         
@@ -117,10 +138,6 @@ class PincherController(Node):
         
         # Timer para publicar joint states
         self.joint_state_timer = self.create_timer(0.1, self.publish_joint_states)  # 10 Hz
-        
-        # Posiciones actuales de las articulaciones (en radianes / metros)
-        # Mantén el tamaño sincronizado con el número de motores (dxl_ids)
-        self.current_joint_positions = [0.0] * 5  # Para 5 articulaciones / ejes
 
         # Longitudes de eslabones para cinemática directa (m), según DH estándar proporcionado
         self.L1 = 0.045
@@ -128,33 +145,14 @@ class PincherController(Node):
         self.L3 = 0.107
         self.L4 = 0.109
 
-        # Pose cartesiana actual del TCP (x, y, z en metros)
+        # Pose cartesiana actual del TCP (x, y, z en metros) y orientación RPY (rad)
         self.current_tcp_xyz = (0.0, 0.0, 0.0)
-
+        self.current_tcp_rpy = (0.0, 0.0, 0.0)
+        
         # Offset en Z aplicado sobre el primer eslabón (L1) para alinear
         # la cinemática DH con la referencia que usas en RViz (punta de la garra).
         # Solo afecta a la visualización del TCP, no al control del robot.
         self.tcp_z_offset = -0.02  # metros
-        
-        # Mapeo de IDs de motor a nombres de articulaciones del URDF de
-        # `phantomx_pincher_description/urdf/phantomx_pincher.urdf`
-        # Estos nombres DEBEN coincidir con los joints que publica
-        # robot_state_publisher para que RViz pueda animar el modelo.
-        self.joint_names = [
-            'phantomx_pincher_arm_shoulder_pan_joint',
-            'phantomx_pincher_arm_shoulder_lift_joint',
-            'phantomx_pincher_arm_elbow_flex_joint',
-            'phantomx_pincher_arm_wrist_flex_joint',
-            'phantomx_pincher_gripper_finger1_joint',  # usamos el dedo 1 como gripper
-        ]
-
-        self.joint_sign = {
-            1:  1,   
-            2: -1,   
-            3: -1,   
-            4: -1,   
-            5:  1,   
-        }
 
         # Publicador de la pose del TCP (calculada con cinemática directa DH)
         self.tcp_pose_pub = self.create_publisher(PoseStamped, '/tcp_pose', 10)
@@ -272,8 +270,42 @@ class PincherController(Node):
             dtype=float,
         )
 
+    def _matrix_to_rpy(self, R):
+        """Convierte una matriz de rotación 3x3 a ángulos roll, pitch, yaw (rad).
+
+        Convención: Rotación Z-Y-X (yaw-pitch-roll), consistente con RPY estándar.
+        """
+        # Evitar problemas numéricos
+        r20 = max(min(R[2, 0], 1.0), -1.0)
+        pitch = math.asin(-r20)
+
+        if abs(r20) < 0.9999:
+            roll = math.atan2(R[2, 1], R[2, 2])
+            yaw = math.atan2(R[1, 0], R[0, 0])
+        else:
+            # Singularidad (gimbal lock)
+            roll = 0.0
+            yaw = math.atan2(-R[0, 1], R[1, 1])
+
+        return roll, pitch, yaw
+
+    def _rpy_to_quaternion(self, roll, pitch, yaw):
+        """Convierte RPY (rad) a un cuaternión (x, y, z, w)."""
+        cr = math.cos(roll / 2.0)
+        sr = math.sin(roll / 2.0)
+        cp = math.cos(pitch / 2.0)
+        sp = math.sin(pitch / 2.0)
+        cy = math.cos(yaw / 2.0)
+        sy = math.sin(yaw / 2.0)
+
+        qw = cr * cp * cy + sr * sp * sy
+        qx = sr * cp * cy - cr * sp * sy
+        qy = cr * sp * cy + sr * cp * sy
+        qz = cr * cp * sy - sr * sp * cy
+        return qx, qy, qz, qw
+
     def compute_tcp_fk(self):
-        """Calcula X,Y,Z del TCP usando DH estándar y los 4 primeros joints.
+        """Calcula X,Y,Z y R,P,Y del TCP usando DH estándar y los 4 primeros joints.
 
         Usa las longitudes L1..L4 proporcionadas por ti:
             L1 = 0.045
@@ -288,7 +320,7 @@ class PincherController(Node):
             q4 = wrist
         """
         if len(self.current_joint_positions) < 4:
-            return 0.0, 0.0, 0.0
+            return 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
         # Ángulos articulares actuales (radianes) en el convenio de ROS/URDF.
         # Aplicamos offsets para que la configuración HOME del robot (q=0)
@@ -321,7 +353,8 @@ class PincherController(Node):
 
         H = A1 @ A2 @ A3 @ A4
 
-        # Coordenadas en el marco DH "puro"
+        # Separar rotación y traslación en el marco DH "puro"
+        R_dh = H[0:3, 0:3]
         x_dh = float(H[0, 3])
         y_dh = float(H[1, 3])
         z = float(H[2, 3])
@@ -330,17 +363,30 @@ class PincherController(Node):
         #   - Rotación de +90° alrededor de Z:
         #       x_base = -y_dh
         #       y_base =  x_dh
+        Rz90 = np.array(
+            [
+                [0.0, -1.0, 0.0],
+                [1.0,  0.0, 0.0],
+                [0.0,  0.0, 1.0],
+            ],
+            dtype=float,
+        )
+        R_base = Rz90 @ R_dh
+
         x_base = -y_dh
         y_base = x_dh
 
-        return x_base, y_base, z
+        roll, pitch, yaw = self._matrix_to_rpy(R_base)
+
+        return x_base, y_base, z, roll, pitch, yaw
 
     def update_tcp_pose(self):
         """Actualiza la pose cartesiana del TCP usando cinemática directa DH estándar."""
-        x, y, z = self.compute_tcp_fk()
+        x, y, z, roll, pitch, yaw = self.compute_tcp_fk()
 
         # Actualizar estado interno
         self.current_tcp_xyz = (x, y, z)
+        self.current_tcp_rpy = (roll, pitch, yaw)
 
         # Publicar PoseStamped para RViz / debug
         pose = PoseStamped()
@@ -353,11 +399,12 @@ class PincherController(Node):
         pose.pose.position.y = y
         pose.pose.position.z = z
 
-        # No calculamos orientación completa por ahora → identidad (sin rotación)
-        pose.pose.orientation.x = 0.0
-        pose.pose.orientation.y = 0.0
-        pose.pose.orientation.z = 0.0
-        pose.pose.orientation.w = 1.0
+        # Orientación completa a partir de roll, pitch, yaw
+        qx, qy, qz, qw = self._rpy_to_quaternion(roll, pitch, yaw)
+        pose.pose.orientation.x = qx
+        pose.pose.orientation.y = qy
+        pose.pose.orientation.z = qz
+        pose.pose.orientation.w = qw
 
         self.tcp_pose_pub.publish(pose)
 
@@ -374,7 +421,14 @@ class PincherController(Node):
         marker.color.g = 1.0
         marker.color.b = 1.0
         marker.color.a = 1.0
-        marker.text = f"X={x:.3f}\nY={y:.3f}\nZ={z:.3f}"
+        # Mostrar también RPY en grados
+        roll_deg = math.degrees(roll)
+        pitch_deg = math.degrees(pitch)
+        yaw_deg = math.degrees(yaw)
+        marker.text = (
+            f"X={x:.3f}\nY={y:.3f}\nZ={z:.3f}\n"
+            f"R={roll_deg:.1f}°\nP={pitch_deg:.1f}°\nY={yaw_deg:.1f}°"
+        )
 
         self.tcp_marker_pub.publish(marker)
 
@@ -496,20 +550,32 @@ class PincherGUI:
         self.tab2 = ttk.Frame(self.notebook)
         self.tab3 = ttk.Frame(self.notebook)  # Nueva pestaña para RViz
         self.tab4 = ttk.Frame(self.notebook)  # Nueva pestaña para control por pose
+        self.tab5 = ttk.Frame(self.notebook)  # Pestaña "Acerca de"
 
         self.notebook.add(self.tab1, text='Control por Sliders')
         self.notebook.add(self.tab2, text='Control por Valores')
         self.notebook.add(self.tab3, text='Visualización RViz')
         self.notebook.add(self.tab4, text='Control por Pose')
+        self.notebook.add(self.tab5, text='Acerca de')
 
         # Configurar las pestañas
         self.setup_tab1()
         self.setup_tab2()
         self.setup_tab3()
         self.setup_tab4()
+        self.setup_tab5()
 
         # Barra de botones comunes en la parte inferior
         self.setup_common_buttons()
+
+        # Barra global con XYZ y RPY del TCP (visible en todas las pestañas)
+        self.setup_tcp_status_bar()
+
+        # Mostrar/ocultar barra TCP según pestaña (no se muestra en "Acerca de")
+        self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_changed)
+
+        # Iniciar actualización periódica de articulaciones y pose TCP
+        self.update_joints_timer()
 
     def setup_tab1(self):
         """Configura la pestaña 1: Control por Sliders en Tiempo Real"""
@@ -728,55 +794,8 @@ Características:
                                          font=("Arial", 10), fg="red")
         self.rviz_status_label.pack(pady=10)
         
-        # Frame de información de articulaciones
-        joints_frame = tk.Frame(self.tab3)
-        joints_frame.pack(fill='x', padx=20, pady=10)
-        
-        joints_label = tk.Label(joints_frame, text="Posiciones de Articulaciones (radianes):", 
-                               font=("Arial", 10, "bold"))
-        joints_label.pack(anchor='w')
-        
-        # Etiquetas para mostrar posiciones actuales
-        self.joint_labels = {}
-        for i, joint_name in enumerate(self.controller.joint_names):
-            joint_frame = tk.Frame(joints_frame)
-            joint_frame.pack(fill='x', pady=2)
-            
-            label = tk.Label(joint_frame, text=f"{joint_name}:", 
-                            font=("Arial", 9), width=10, anchor='w')
-            label.pack(side='left')
-            
-            value_label = tk.Label(joint_frame, text="0.000", 
-                                  font=("Arial", 9), width=10)
-            value_label.pack(side='left')
-            
-            self.joint_labels[joint_name] = value_label
-
-        # Frame para mostrar la posición cartesiana del TCP
-        tcp_frame = tk.Frame(self.tab3)
-        tcp_frame.pack(fill='x', padx=20, pady=10)
-
-        tcp_label = tk.Label(
-            tcp_frame,
-            text="Posición TCP (m) (cinemática DH, base del brazo):",
-            font=("Arial", 10, "bold")
-        )
-        tcp_label.pack(anchor='w')
-
-        tcp_values_frame = tk.Frame(tcp_frame)
-        tcp_values_frame.pack(fill='x', pady=5)
-
-        self.tcp_x_label = tk.Label(tcp_values_frame, text="X: 0.000", font=("Arial", 9), width=12)
-        self.tcp_x_label.pack(side='left', padx=5)
-
-        self.tcp_y_label = tk.Label(tcp_values_frame, text="Y: 0.000", font=("Arial", 9), width=12)
-        self.tcp_y_label.pack(side='left', padx=5)
-
-        self.tcp_z_label = tk.Label(tcp_values_frame, text="Z: 0.000", font=("Arial", 9), width=12)
-        self.tcp_z_label.pack(side='left', padx=5)
-
-        # Timer para actualizar las posiciones de las articulaciones y del TCP
-        self.update_joints_timer()
+        # El timer de actualización se inicia en __init__ después de crear
+        # la barra global de pose TCP.
 
     def setup_tab4(self):
         """Configura la pestaña 4: Control por Pose Predefinida"""
@@ -788,41 +807,80 @@ Características:
         )
         title_label.pack(pady=10)
 
-        # Descripción de las poses
-        info_text = (
-            "Pose 1 (en grados):\n"
-            "  1ra: 15°,   2da: 10°,   3ra: 90°,   4ta: 90°,   5ta: -50°\n\n"
-            "Pose 2 (en grados):\n"
-            "  1ra: -90°,  2da: -30°,  3ra: 120°,  4ta: 45°,   5ta: -60°\n\n"
-            "Pose HOME (en grados):\n"
-            "  1ra: 0°,    2da: 0°,    3ra: 0°,    4ta: 0°,    5ta: 0°\n\n"
-            "Las articulaciones se moverán en orden desde la base hasta la última."
-        )
-        info_label = tk.Label(
-            self.tab4,
-            text=info_text,
-            justify=tk.LEFT,
-            font=("Arial", 10),
-            bg="#f0f0f0",
-            relief="solid",
-            padx=10,
-            pady=10
-        )
-        info_label.pack(fill='x', padx=20, pady=10)
+        # Frame para todos los botones de pose
+        buttons_frame = tk.Frame(self.tab4)
+        buttons_frame.pack(fill='x', padx=40, pady=20)
+        buttons_frame.columnconfigure(0, weight=1)
+        buttons_frame.columnconfigure(1, weight=1)
 
-        # Botón para ir a pose 1
+        button_style = {
+            "font": ("Arial", 11, "bold"),
+            "bg": "#4CAF50",
+            "fg": "white",
+            "height": 2,
+            "width": 28,
+        }
+
+        # Pose 1 personalizada
         self.pose1_btn = tk.Button(
-            self.tab4,
-            text="Ir a pose 1",
-            font=("Arial", 12, "bold"),
-            bg="#4CAF50",
-            fg="white",
+            buttons_frame,
+            text="Pose 1 personalizada: [15, 10, 90, 90, -50]",
             command=self.start_pose1_sequence,
-            height=2
+            **button_style,
         )
-        self.pose1_btn.pack(pady=15)
+        self.pose1_btn.grid(row=0, column=0, padx=5, pady=4, sticky='ew')
 
-        # Etiqueta de estado de la pose
+        # Pose 2 personalizada
+        self.pose2_btn = tk.Button(
+            buttons_frame,
+            text="Pose 2 personalizada: [-90, -30, 120, 45, -60]",
+            command=self.start_pose2_sequence,
+            **button_style,
+        )
+        self.pose2_btn.grid(row=0, column=1, padx=5, pady=4, sticky='ew')
+
+        # Poses de laboratorio
+        self.pose_lab1_btn = tk.Button(
+            buttons_frame,
+            text="Pose Lab 1: [0, 0, 0, 0, 0]",
+            command=self.start_lab_pose1_sequence,
+            **button_style,
+        )
+        self.pose_lab1_btn.grid(row=1, column=0, padx=5, pady=4, sticky='ew')
+
+        self.pose_lab2_btn = tk.Button(
+            buttons_frame,
+            text="Pose Lab 2: [25, 25, 20, -20, 0]",
+            command=self.start_lab_pose2_sequence,
+            **button_style,
+        )
+        self.pose_lab2_btn.grid(row=1, column=1, padx=5, pady=4, sticky='ew')
+
+        self.pose_lab3_btn = tk.Button(
+            buttons_frame,
+            text="Pose Lab 3: [-35, 35, -30, 30, 0]",
+            command=self.start_lab_pose3_sequence,
+            **button_style,
+        )
+        self.pose_lab3_btn.grid(row=2, column=0, padx=5, pady=4, sticky='ew')
+
+        self.pose_lab4_btn = tk.Button(
+            buttons_frame,
+            text="Pose Lab 4: [85, -20, 55, 25, 0]",
+            command=self.start_lab_pose4_sequence,
+            **button_style,
+        )
+        self.pose_lab4_btn.grid(row=2, column=1, padx=5, pady=4, sticky='ew')
+
+        self.pose_lab5_btn = tk.Button(
+            buttons_frame,
+            text="Pose Lab 5: [80, -35, 55, -45, 0]",
+            command=self.start_lab_pose5_sequence,
+            **button_style,
+        )
+        self.pose_lab5_btn.grid(row=3, column=0, padx=5, pady=4, sticky='ew')
+
+        # Etiqueta de estado general para las poses
         self.pose1_status_label = tk.Label(
             self.tab4,
             text="Listo",
@@ -830,46 +888,6 @@ Características:
             fg="green"
         )
         self.pose1_status_label.pack(pady=5)
-
-        # Botón para ir a pose 2
-        self.pose2_btn = tk.Button(
-            self.tab4,
-            text="Ir a pose 2",
-            font=("Arial", 12, "bold"),
-            bg="#8BC34A",
-            fg="white",
-            command=self.start_pose2_sequence,
-            height=2
-        )
-        self.pose2_btn.pack(pady=10)
-
-        self.pose2_status_label = tk.Label(
-            self.tab4,
-            text="Listo",
-            font=("Arial", 9),
-            fg="green"
-        )
-        self.pose2_status_label.pack(pady=5)
-
-        # Botón para ir a pose HOME (secuencial)
-        self.pose_home_btn = tk.Button(
-            self.tab4,
-            text="Ir a pose HOME",
-            font=("Arial", 12, "bold"),
-            bg="#2196F3",
-            fg="white",
-            command=self.start_home_pose_sequence,
-            height=2
-        )
-        self.pose_home_btn.pack(pady=10)
-
-        self.pose_home_status_label = tk.Label(
-            self.tab4,
-            text="Listo",
-            font=("Arial", 9),
-            fg="green"
-        )
-        self.pose_home_status_label.pack(pady=5)
 
     def setup_common_buttons(self):
         """Configura los botones comunes en la parte inferior"""
@@ -893,6 +911,100 @@ Características:
         self.status_label = tk.Label(common_buttons_frame, text="Sistema Listo", 
                                     font=("Arial", 9), fg="green")
         self.status_label.pack(side='bottom', pady=5)
+
+    def setup_tcp_status_bar(self):
+        """Barra inferior con XYZ y RPY del TCP (visible en casi todas las pestañas)."""
+        self.tcp_status_frame = tk.Frame(self.window)
+        self.tcp_status_frame.pack(fill='x', padx=20, pady=(0, 10))
+
+        # Bloque de pose TCP
+        tcp_title = tk.Label(
+            self.tcp_status_frame,
+            text="Pose TCP (X, Y, Z, R, P, Y):",
+            font=("Arial", 9, "bold")
+        )
+        tcp_title.pack(side='left')
+
+        tcp_values_frame = tk.Frame(self.tcp_status_frame)
+        tcp_values_frame.pack(side='left', padx=8)
+
+        self.tcp_x_label_global = tk.Label(tcp_values_frame, text="X: 0.000", font=("Arial", 9), width=10)
+        self.tcp_x_label_global.pack(side='left')
+
+        self.tcp_y_label_global = tk.Label(tcp_values_frame, text="Y: 0.000", font=("Arial", 9), width=10)
+        self.tcp_y_label_global.pack(side='left')
+
+        self.tcp_z_label_global = tk.Label(tcp_values_frame, text="Z: 0.000", font=("Arial", 9), width=10)
+        self.tcp_z_label_global.pack(side='left')
+
+        self.tcp_r_label_global = tk.Label(tcp_values_frame, text="R: 0.0°", font=("Arial", 9), width=10)
+        self.tcp_r_label_global.pack(side='left')
+
+        self.tcp_p_label_global = tk.Label(tcp_values_frame, text="P: 0.0°", font=("Arial", 9), width=10)
+        self.tcp_p_label_global.pack(side='left')
+
+        self.tcp_yaw_label_global = tk.Label(tcp_values_frame, text="Y: 0.0°", font=("Arial", 9), width=10)
+        self.tcp_yaw_label_global.pack(side='left')
+
+        # Separador vertical
+        sep = tk.Frame(self.tcp_status_frame, width=2, bd=0, relief='sunken', bg="#cccccc")
+        sep.pack(side='left', fill='y', padx=8)
+
+        # Bloque de ángulos articulares (q1..q5)
+        q_title = tk.Label(
+            self.tcp_status_frame,
+            text="Ángulos articulares (q1..q5, grados respecto a HOME):",
+            font=("Arial", 9, "bold")
+        )
+        q_title.pack(side='left')
+
+        q_values_frame = tk.Frame(self.tcp_status_frame)
+        q_values_frame.pack(side='left', padx=8)
+
+        self.q_labels_global = {}
+        for i in range(1, 6):
+            lbl = tk.Label(q_values_frame, text=f"q{i}: 0.0°", font=("Arial", 9), width=9)
+            lbl.pack(side='left')
+            self.q_labels_global[i] = lbl
+
+    def setup_tab5(self):
+        """Configura la pestaña 5: Información del grupo (Acerca de)"""
+        info_frame = tk.Frame(self.tab5)
+        info_frame.pack(fill='both', expand=True, padx=40, pady=40)
+
+        title = tk.Label(
+            info_frame,
+            text="Proyecto: Lab 05 - Cinemática Directa - PhantomX Pincher X100",
+            font=("Arial", 14, "bold")
+        )
+        title.pack(pady=(0, 20))
+
+        group_label = tk.Label(
+            info_frame,
+            text=(
+                "Integrantes del grupo:\n\n"
+                "  • Sergio Andrés Bolaños Penagos\n"
+                "  • Sergio Felipe Rodriguez Mayorga\n\n"
+                "Universidad Nacional de Colombia\n"
+                "Programa: Ingeniería Mecatrónica\n"
+                "Asignatura: Robótica"
+            ),
+            justify=tk.LEFT,
+            font=("Arial", 11),
+        )
+        group_label.pack(anchor='w')
+
+    def on_tab_changed(self, event):
+        """Muestra u oculta la barra de pose TCP según la pestaña actual."""
+        current_tab = self.notebook.select()
+        tab_widget = self.notebook.nametowidget(current_tab)
+        if tab_widget is self.tab5:
+            # Ocultar barra TCP en pestaña "Acerca de"
+            self.tcp_status_frame.pack_forget()
+        else:
+            # Volver a mostrar si no está ya empacada
+            if not self.tcp_status_frame.winfo_ismapped():
+                self.tcp_status_frame.pack(fill='x', padx=20, pady=(0, 10))
 
     def launch_rviz(self):
         """Lanza robot_state_publisher + RViz usando ros2 launch"""
@@ -952,18 +1064,29 @@ Características:
             return ""
 
     def update_joints_timer(self):
-        """Actualiza periódicamente las posiciones de las articulaciones y del TCP en la interfaz"""
-        for i, joint_name in enumerate(self.controller.joint_names):
-            if i < len(self.controller.current_joint_positions):
-                position = self.controller.current_joint_positions[i]
-                self.joint_labels[joint_name].config(text=f"{position:.3f}")
+        """Actualiza periódicamente la pose TCP y los ángulos articulares en la interfaz."""
+        joint_positions = getattr(self.controller, "current_joint_positions", [])
 
-        # Actualizar posición cartesiana del TCP si está disponible
-        if hasattr(self.controller, "current_tcp_xyz"):
+        # Actualizar pose TCP global (XYZ + RPY) y ángulos articulares (q1..q5) si están disponibles
+        if hasattr(self.controller, "current_tcp_xyz") and hasattr(self.controller, "current_tcp_rpy"):
             x, y, z = self.controller.current_tcp_xyz
-            self.tcp_x_label.config(text=f"X: {x:.3f}")
-            self.tcp_y_label.config(text=f"Y: {y:.3f}")
-            self.tcp_z_label.config(text=f"Z: {z:.3f}")
+            roll, pitch, yaw = self.controller.current_tcp_rpy
+
+            self.tcp_x_label_global.config(text=f"X: {x:.3f}")
+            self.tcp_y_label_global.config(text=f"Y: {y:.3f}")
+            self.tcp_z_label_global.config(text=f"Z: {z:.3f}")
+
+            self.tcp_r_label_global.config(text=f"R: {math.degrees(roll):.1f}°")
+            self.tcp_p_label_global.config(text=f"P: {math.degrees(pitch):.1f}°")
+            self.tcp_yaw_label_global.config(text=f"Y: {math.degrees(yaw):.1f}°")
+
+        # Actualizar q1..q5 en grados respecto a HOME usando current_joint_positions
+        if joint_positions and hasattr(self, "q_labels_global"):
+            for i in range(1, 6):
+                if i - 1 < len(joint_positions):
+                    angle_rad = joint_positions[i - 1]
+                    angle_deg = math.degrees(angle_rad)
+                    self.q_labels_global[i].config(text=f"q{i}: {angle_deg:.1f}°")
 
         # Programar siguiente actualización
         self.window.after(100, self.update_joints_timer)
@@ -1110,11 +1233,17 @@ Características:
             target_angles,
             "Pose 2",
             self.pose2_btn,
-            self.pose2_status_label
+            self.pose1_status_label
         )
 
     def start_home_pose_sequence(self):
-        """Inicia la secuencia para mover el robot a la Pose HOME en orden base → extremo."""
+        """Inicia la secuencia para mover el robot a la Pose HOME (alias de Pose Lab 1)."""
+        self.start_lab_pose1_sequence()
+
+    # ---------------- Poses del laboratorio (cinemática directa) ----------------
+
+    def start_lab_pose1_sequence(self):
+        """Pose Lab 1: [0, 0, 0, 0, 0] (equivalente a HOME)."""
         target_angles = {
             1: 0.0,
             2: 0.0,
@@ -1124,10 +1253,74 @@ Características:
         }
         self.start_pose_sequence(
             target_angles,
-            "Pose HOME",
-            self.pose_home_btn,
-            self.pose_home_status_label,
-            reverse=True
+            "Pose Lab 1",
+            self.pose_lab1_btn,
+            self.pose1_status_label,  # reutilizamos etiqueta principal
+            reverse=True  # HOME: de la última articulación hacia la base
+        )
+
+    def start_lab_pose2_sequence(self):
+        """Pose Lab 2: [25, 25, 20, -20, 0]."""
+        target_angles = {
+            1: 25.0,
+            2: 25.0,
+            3: 20.0,
+            4: -20.0,
+            5: 0.0,
+        }
+        self.start_pose_sequence(
+            target_angles,
+            "Pose Lab 2",
+            self.pose_lab2_btn,
+            self.pose1_status_label,
+        )
+
+    def start_lab_pose3_sequence(self):
+        """Pose Lab 3: [-35, 35, -30, 30, 0]."""
+        target_angles = {
+            1: -35.0,
+            2: 35.0,
+            3: -30.0,
+            4: 30.0,
+            5: 0.0,
+        }
+        self.start_pose_sequence(
+            target_angles,
+            "Pose Lab 3",
+            self.pose_lab3_btn,
+            self.pose1_status_label,
+        )
+
+    def start_lab_pose4_sequence(self):
+        """Pose Lab 4: [85, -20, 55, 25, 0]."""
+        target_angles = {
+            1: 85.0,
+            2: -20.0,
+            3: 55.0,
+            4: 25.0,
+            5: 0.0,
+        }
+        self.start_pose_sequence(
+            target_angles,
+            "Pose Lab 4",
+            self.pose_lab4_btn,
+            self.pose1_status_label,
+        )
+
+    def start_lab_pose5_sequence(self):
+        """Pose Lab 5: [80, -35, 55, -45, 0]."""
+        target_angles = {
+            1: 80.0,
+            2: -35.0,
+            3: 55.0,
+            4: -45.0,
+            5: 0.0,
+        }
+        self.start_pose_sequence(
+            target_angles,
+            "Pose Lab 5",
+            self.pose_lab5_btn,
+            self.pose1_status_label,
         )
 
     def on_motor_slider_change(self, motor_id):

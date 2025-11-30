@@ -41,7 +41,7 @@ Este documento resume **qué falta por implementar** para completar el Lab 05 co
 
 ## 3. Integración Python + ROS 2 + Toolbox (cinemática directa)
 
-- [ ] **Script de cinemática directa con Toolbox**
+- [x] **Script de cinemática directa con Toolbox**
   - Usar los parámetros DH definidos en la sección 1 en una toolbox de robótica (Matlab, Python Robotics Toolbox u otra).
   - Recibir una configuración articular (por ejemplo, las 5 poses propuestas en la guía).
   - Enviar esa configuración al robot (vía ROS 2).
@@ -56,10 +56,10 @@ Este documento resume **qué falta por implementar** para completar el Lab 05 co
 
 ## 4. Extensiones de la interfaz gráfica (HMI)
 
-- [ ] **Personalización de la GUI**
+- [x] **Personalización de la GUI**
   - Añadir información del **grupo** (nombres de integrantes, logos, etc.) en la ventana principal o en una pestaña “Acerca de”.
 
-- [ ] **Botones para poses predefinidas**
+- [x] **Botones para poses predefinidas**
   - Actualmente implementadas en `control_servo.py`:
     - Pose HOME secuencial (extremo → base).
     - Pose 1 y Pose 2 secuenciales (base → extremo), definidas en grados.
@@ -76,7 +76,7 @@ Este documento resume **qué falta por implementar** para completar el Lab 05 co
     - Movimiento directo a la pose (planificación en espacio de configuración).
     - Trayectoria cartesiana (usando `cartesian_path = true`).
 
-- [ ] **Pestaña de visualización numérica de la pose cartesiana**
+- [/] **Pestaña de visualización numérica de la pose cartesiana**
   - Mostrar en tiempo real la pose cartesiana del TCP:
     - **X, Y, Z** (m).
     - **Roll, Pitch, Yaw** (rad o grados).
