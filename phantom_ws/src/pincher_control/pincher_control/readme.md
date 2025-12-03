@@ -2,6 +2,7 @@
 
 ## TERMINAL1
 ```
+
 ros2 run pincher_control follow_joint_trajectory
 ```
 ## TERMINAL2
