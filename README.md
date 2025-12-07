@@ -150,7 +150,7 @@ Desarrolle una interfaz gráfica (HMI) que muestre:
 
 ---
 
-## 🎬 Video de simulación y entorno físico
+## Video de simulación y entorno físico
 
 Video donde se evidencia la simulación en RViz y el comportamiento del robot en el entorno físico (poses y uso de la interfaz gráfica):
 
