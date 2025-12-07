@@ -77,7 +77,6 @@ Se incluyen tópicos de movimiento para las articulaciones, la conexión con los
 
 ---
 
----
 
 ## Video de simulación y entorno físico
 
@@ -85,6 +84,7 @@ Video donde se evidencia la simulación en RViz y el comportamiento del robot en
 
 [![Video de simulación y entorno físico](https://img.youtube.com/vi/65TIC8xtnyM/0.jpg)](https://youtu.be/65TIC8xtnyM)
 
+</div>
 
 ---
 
