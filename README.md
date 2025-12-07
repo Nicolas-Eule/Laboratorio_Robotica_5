@@ -146,9 +146,41 @@ Desarrolle una interfaz gráfica (HMI) que muestre:
 3. Plano de planta de la ubicación de cada uno de los elementos.
 4. Descripción de las funciones utilizadas.
 5. Código del script utilizado para el desarrollo de la práctica.
+
+
+---
+
+## 🎬 Video de simulación y entorno físico
+
+Video donde se evidencia la simulación en RViz y el comportamiento del robot en el entorno físico (poses y uso de la interfaz gráfica):
+
+[![Video de simulación y entorno físico](https://img.youtube.com/vi/65TIC8xtnyM/0.jpg)](https://youtu.be/65TIC8xtnyM)
+
+> 🔊 Nota: los videos deben iniciar con la introducción oficial del laboratorio **LabSIR Intro LabSIR**, tal como se exige en la guía.
+
+---
+
+## 📌 Objetivos del laboratorio
+
+1. **Crear todos los Joint Controllers** con ROS para manipular servomotores Dynamixel AX-12 del robot Phantom X Pincher.
+2. **Manipular los tópicos de estado y comando** para todos los Joint Controllers del robot, entendiendo la diferencia entre:
+   - Tópicos de *estado* (lectura de posición, velocidad, corriente, etc.).
+   - Tópicos de *comando* (referencias de posición/velocidad para cada articulación).
+3. **Manipular servicios ROS 2** asociados a los Joint Controllers (por ejemplo, habilitar/deshabilitar torque, reiniciar controladores o mover a la posición *home*).
+4. **Conectar el robot Phantom X Pincher con Python usando ROS 2**, de forma que:
+   - Pueda enviarse una configuración articular desde Python al robot.
+   - Se reciba el estado articular para validación y visualización.
+   - Se integre con herramientas de modelado (toolbox) para graficar la configuración.
+
+---
+
+## 🧱 Requisitos de software y hardware
+
+- **Sistema operativo:** Ubuntu 22.xx (preferiblemente **22.04 LTS**) con **ROS 2 Humble** instalado.
+- **Espacio de trabajo ROS 2** configurado para compilar con `colcon build`.
+- **Paquetes de Dynamixel Workbench:**
 6. Video del brazo alcanzando cada posición solicitada.
 7. Video demostración de uso de la interfaz de usuario.
 8. Gráfica digital de las poses comparándola con la fotografía del brazo real en la misma configuración.
 
-## Fecha de entrega
-Consultar la actividad en Moodle.
+
