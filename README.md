@@ -102,147 +102,234 @@ Se incluyen tópicos de movimiento para las articulaciones, la conexión con los
 ## Desarrollo del ejercicio en el laboratorio
 
 ### Mediciones
-Se determinaron las longitudes de eslabón de cada articulación del robot Phantom X Pincher utilizando un calibrador digital. Para ello se definieron referencias fijas en la base y en cada junta y se registraron las distancias entre ejes consecutivos. Con estos datos se elaboró un diagrama esquemático del manipulador —análogo al presentado en la Figura 2 de la guía— donde se consignaron los nombres de los eslabones y sus dimensiones efectivas.
+
+Las longitudes de cada eslabón del Phantom X Pincher se midieron sobre el manipulador real empleando un calibrador digital, tomando como referencia los ejes de rotación definidos en la guía del laboratorio. Para garantizar coherencia con el modelo CAD y con la posterior simulación, estas medidas se contrastaron con la información geométrica disponible en el repositorio de modelos 3D del kit:
+
+- [`3DModels_KIT_Phantom_Pincher_X100`](https://github.com/labsir-un/3DModels_KIT_Phantom_Pincher_X100)
+
+En particular, se revisaron las carpetas asociadas al **Phantom X Pincher** y al **kit de ensamble**, donde se almacenan las mallas y planos del robot (archivos `.stl` y documentación en PDF). Con ello se verificó que las longitudes físicas de los eslabones coincidieran con la segmentación usada en las mallas (base, hombro, brazo superior, antebrazo y gripper), lo que permitió después reutilizar esas mismas mallas en el modelo URDF/XACRO sin inconsistencias de escala ni de alineamiento.
+
+A partir de las medidas definitivas se elaboró un diagrama esquemático análogo al de la Figura 2 de la guía, rotulando cada eslabón, su longitud efectiva y la posición relativa de las juntas.
 
 ### Análisis
-A partir de las dimensiones medidas se construyó la tabla de parámetros Denavit–Hartenberg (DH) del Phantom X Pincher. Para cada junta se establecieron los parámetros \(a_i\), \(\alpha_i\), \(d_i\) y \(\theta_i\) en coherencia con la asignación de marcos de referencia utilizada en el modelo de simulación. Con esta información se generó un diagrama del robot que incluye la tabla DH y los sistemas de coordenadas por junta, verificando la compatibilidad con el modelo cinemático usado posteriormente en los paquetes de descripción y control.
+
+Con las dimensiones finales se construyó la tabla de parámetros Denavit–Hartenberg (DH) del Phantom X Pincher, siguiendo la convención de marcos utilizada en los ejemplos de ROS 2 para este robot. La asignación de marcos y los nombres de las juntas (`waist`, `shoulder`, `elbow`, `wrist`, `gripper`) se alinearon con la estructura propuesta en los paquetes de descripción y control del ecosistema Phantom:
+
+- Guía de control en ROS 2 Humble para el Phantom X Pincher:  
+  [`ROB_Intro_ROS2_Humble_Phantom_Pincher_X100`](https://github.com/labsir-un/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100)
+- Guía de descripción y visualización en RViz:  
+  [`ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_RVIZ`](https://github.com/labsir-un/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_RVIZ)
+
+En la guía de RViz se detalla la creación de un paquete de descripción `pincher_description` con un archivo `robot.xacro` y un conjunto de mallas segmentadas (`px100_1_base.stl`, `px100_2_shoulder.stl`, `px100_3_upper_arm.stl`, etc.) que se organizan dentro de una carpeta `meshes/`. A partir de esa referencia se ajustaron los parámetros \(a_i\), \(\alpha_i\), \(d_i\) y \(\theta_i\) para que:
+
+- La cinemática usada en la tabla DH fuese compatible con la cadena de transformaciones codificada en el `robot.xacro`.
+- La orientación de cada marco DH fuera consistente con la que utiliza `robot_state_publisher` para publicar `/robot_description`.
+
+El resultado fue una tabla DH que sirve tanto para el toolbox de robótica en Python como para la descripción URDF/XACRO del robot, garantizando que la pose cartesiana obtenida analíticamente coincida con la visualización en RViz.
 
 ### Organización del repositorio y workspace `phantom_ws`
 
-Todo el desarrollo software del proyecto se consolidó en el repositorio:
+Todo el desarrollo se consolidó en el repositorio de proyecto final:
 
 - [`sergiosinlimites/robotica-proyecto-final`](https://github.com/sergiosinlimites/robotica-proyecto-final)
 
-Dentro de este repositorio se organizó un workspace ROS 2 dedicado al Phantom X Pincher:
+Dentro de este repositorio se creó un workspace ROS 2 específico para el Phantom X Pincher:
 
 - Workspace: `phantom_ws`
 - Código fuente: `phantom_ws/src`
 
-En `phantom_ws/src` se alojaron los paquetes de ROS 2 desarrollados en la práctica, agrupando:
+La organización de `phantom_ws/src` sigue la filosofía propuesta en los repositorios del kit oficial:
 
-- Paquetes de **descripción** del robot (modelo URDF/XACRO y mallas).
-- Paquetes de **control articular** y conexión con los servomotores Dynamixel.
-- Paquetes para la **integración con RViz / MoveIt**.
-- Paquetes para la **interfaz gráfica (HMI)** y los scripts de pruebas de laboratorio.
+- [`KIT_Phantom_X_Pincher_ROS2`](https://github.com/labsir-un/KIT_Phantom_X_Pincher_ROS2)
+- [`ROB_Intro_ROS2_Humble_Phantom_Pincher_X100`](https://github.com/labsir-un/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100)
+- [`ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_RVIZ`](https://github.com/labsir-un/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_RVIZ)
 
-De esta forma, el repositorio `robotica-proyecto-final` quedó como contenedor único de la configuración del entorno, los nodos ROS 2, los archivos de lanzamiento y las herramientas utilizadas en el laboratorio, facilitando la compilación con `colcon` y la reutilización del código en futuras prácticas.
+Siguiendo esas referencias, el workspace se estructuró en paquetes que agrupan:
+
+- **Descripción del robot**: modelo URDF/XACRO y mallas importadas desde `3DModels_KIT_Phantom_Pincher_X100`.
+- **Control articular y conexión Dynamixel**: nodos en Python basados en el paquete `pincher_control` descrito en las guías 04 (control del robot) y 05 (control + RViz).
+- **Integración con RViz y MoveIt 2**: paquetes y archivos de lanzamiento para cargar el modelo, la escena y la configuración de planificación.
+- **Interfaz gráfica (HMI)**: scripts en Python que implementan las pestañas de control articular, cartesiano, visualización en RViz y lectura de estados.
+
+De esta forma, `robotica-proyecto-final` actúa como contenedor de todo el entorno funcional del laboratorio (código, configuración y herramientas) sobre un único workspace `phantom_ws`, compatible con la estructura propuesta en los repositorios de referencia del curso.
 
 ### Configuración del entorno (Setup)
 
-La preparación del entorno de trabajo se realizó siguiendo las guías del kit Phantom X Pincher y se volcó en el workspace `phantom_ws` del repositorio `robotica-proyecto-final`:
+La preparación del entorno se realizó tomando como base tres fuentes principales:
 
-1. Se creó el workspace ROS 2 `phantom_ws` y, dentro de `src`, se clonaron y/o copiaron los paquetes base del kit Phantom (descripción del robot, control de Dynamixel, paquetes de RViz y de MoveIt).
-2. Se instalaron las dependencias del proyecto y se compiló el workspace con `colcon build`, dejando el entorno accesible mediante los scripts de `install/setup.bash`.
-3. Se verificó la conexión del manipulador real a través del adaptador USB2Dynamixel (`/dev/ttyUSBx`), ajustando la velocidad de comunicación y los IDs de los servomotores para que coincidieran con la configuración esperada por los nodos de control.
-4. Se añadieron scripts de utilidad (dentro de `phantom_ws/src`) para automatizar el lanzamiento de RViz, MoveIt y la HMI, de modo que toda la práctica pudiera reproducirse a partir del mismo workspace.
+- Sección **Setup** del kit:  
+  [`KIT_Phantom_X_Pincher_ROS2`](https://github.com/labsir-un/KIT_Phantom_X_Pincher_ROS2)
+- Guía 04 – creación del paquete `pincher_control` en ROS 2 Humble:  
+  [`ROB_Intro_ROS2_Humble_Phantom_Pincher_X100`](https://github.com/labsir-un/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100)
+- Guía actualizada de **Setup** para ROS 2 Jazzy/Humble:  
+  [`ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_Updated/guias/Setup`](https://github.com/ElJoho/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_Updated/tree/jazzy/guias/Setup)
 
-Esta etapa dejó listos los paquetes de control, simulación y la estructura del repositorio sobre la cual se construyó el resto de la práctica.
+A partir de esas guías se siguió el siguiente flujo, adaptado al proyecto final:
+
+1. **Creación del workspace y clonación de paquetes base**  
+   Se creó el workspace `phantom_ws` y dentro de `src` se clonaron los repositorios de ejemplo recomendados en las guías (demos de simulación y/o paquetes de control), para utilizarlos como plantilla de estructura y archivos de configuración.
+
+2. **Instalación de dependencias**  
+   Se instalaron las dependencias de ROS 2 y de la librería `dynamixel_sdk` tal como se indica en las guías de control (comandos `rosdep install`, paquetes `ros-humble-dynamixel-sdk`, `python3-serial`, etc.). Esto permitió compilar el workspace con `colcon build` sin conflictos de dependencias.
+
+3. **Configuración de hardware**  
+   Se configuró el puerto serie (`/dev/ttyUSB0` o similar) y se añadió el usuario al grupo `dialout` para tener permisos sobre el adaptador USB2Dynamixel, siguiendo los pasos documentados en la Guía 04. También se verificó que los servomotores AX-12A/XL-430 tuvieran IDs únicos y compatibles con las listas definidas en los scripts de control.
+
+4. **Scripts de lanzamiento**  
+   Aprovechando la estructura propuesta en los repositorios del kit, se añadieron scripts y archivos `launch` dentro de `phantom_ws/src` para:
+   - Lanzar el nodo de control y la HMI.
+   - Abrir RViz con el modelo del robot y el `robot_state_publisher`.
+   - Cargar la configuración de MoveIt 2 para planificación de trayectorias.
+
+Con esta preparación, el workspace `phantom_ws` quedó listo para compilar y lanzar el sistema completo (robot real + RViz + MoveIt + HMI) desde un único entorno.
 
 ### Implementación en ROS 2 y MoveIt
 
-Sobre el workspace `phantom_ws/src` se desarrollaron y ajustaron los paquetes encargados de la simulación y planificación de movimientos:
+El desarrollo de la parte de simulación y planificación tomó como referencia directa las guías de control y visualización:
+
+- Control y workspace base:  
+  [`ROB_Intro_ROS2_Humble_Phantom_Pincher_X100`](https://github.com/labsir-un/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100)
+- Control + RViz + HMI con `pincher_description` y `pincher_control`:  
+  [`ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_RVIZ`](https://github.com/labsir-un/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_RVIZ)
+- Kit general con secciones RVIZ y MoveIt:  
+  [`KIT_Phantom_X_Pincher_ROS2`](https://github.com/labsir-un/KIT_Phantom_X_Pincher_ROS2)
+- Guía actualizada de MoveIt 2:  
+  [`ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_Updated/guias/Moveit`](https://github.com/ElJoho/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_Updated/tree/jazzy/guias/Moveit)
 
 1. **Descripción del robot y RViz**  
-   - Se configuró el modelo del Phantom X Pincher mediante archivos `URDF/XACRO` y mallas 3D, ubicados en los paquetes de descripción del workspace.
-   - Se creó un archivo de lanzamiento para RViz2 que carga el modelo del robot, la configuración de visualización y la fuente de `joint_states`, permitiendo ver el manipulador en 3D desde el inicio.
+   - Se construyó un paquete de descripción análogo a `pincher_description`, que importa las mallas del Phantom desde `3DModels_KIT_Phantom_Pincher_X100` y define la cinemática en un archivo `robot.xacro`.  
+   - Se creó un archivo `display.launch.py` que lanza `robot_state_publisher` y RViz con una configuración predefinida, tal como se propone en la guía de RViz, cargando el modelo 3D del robot y leyendo de `/joint_states`.
 
 2. **Configuración de MoveIt 2**  
-   - Se añadió la configuración de MoveIt 2 para el manipulador, definiendo el grupo de planificación, las articulaciones y el *end effector*.
-   - Se configuró la escena de planificación en RViz2 (grupo de planificación, límites articulares y escenas de colisión) para probar poses y trayectorias antes de ejecutarlas en el robot real.
+   - Siguiendo la guía de MoveIt actualizada, se definió un grupo de planificación que incluye las articulaciones `waist`, `shoulder`, `elbow`, `wrist` y el `gripper` como efector final.  
+   - Se configuraron los límites articulares, la escena de colisión y las plantillas de planificación para poder generar y ejecutar trayectorias desde la interfaz de *Motion Planning* en RViz.
 
 3. **Nodos de control en ROS 2**  
-   En los paquetes de control alojados en `phantom_ws/src` se implementó un nodo (o conjunto de nodos) en Python/ROS 2 que:
-   - Inicializa la comunicación con los servomotores Dynamixel del Phantom X Pincher.
-   - Publica comandos de posición para cada articulación (`waist`, `shoulder`, `elbow`, `wrist` y `gripper`) a través de los tópicos de control.
-   - Actualiza el estado de las juntas en `/joint_states`, garantizando la sincronización entre el robot real, RViz2 y MoveIt 2.
+   - Partiendo del paquete `pincher_control` descrito en la Guía 04 (control básico de servomotores con `dynamixel_sdk`), se integraron las extensiones de la Guía 05: publicación en `/joint_states`, conversión de pasos Dynamixel a radianes (`dxl_to_radians`) y corrección de signos por articulación para que la simulación y el robot real se muevan de forma coherente.  
+   - Estos nodos se adaptaron y ubicaron dentro de `phantom_ws/src`, integrándolos con el resto de paquetes del proyecto final.
 
-4. **Secuencias de movimiento**  
-   - Se programó una rutina que ejecuta el movimiento entre una postura de *home* y diferentes posturas objetivo.
-   - El movimiento se realiza de forma secuencial, iniciando en la base y avanzando hacia las articulaciones distales, con pequeñas pausas entre cada junta para facilitar la observación y reducir movimientos bruscos.
-   - Desde la interfaz de MoveIt 2 se probaron trayectorias planificadas hacia las poses de prueba, validando la cinemática y evitando colisiones.
+4. **Secuencias de movimiento y pruebas con MoveIt 2**  
+   - Se programó una rutina de movimiento entre una postura de *home* y varias posturas objetivo, ejecutada de forma secuencial desde la base hasta el efector final, con pequeñas pausas entre articulaciones.  
+   - Desde MoveIt 2 se planearon trayectorias hacia las poses de prueba, verificando la ausencia de colisiones y la factibilidad cinemática antes de enviar los comandos al robot real.
 
-Con esta implementación, el mismo conjunto de valores articulares se reutilizó en el controlador del robot, en las trayectorias de MoveIt 2 y en la visualización de RViz2, todo gestionado desde el workspace `phantom_ws`.
+Gracias a esta integración, los mismos valores articulares se emplean en el controlador de los servos, en las trayectorias de MoveIt 2 y en la visualización de RViz, todo dentro del workspace `phantom_ws`.
 
 ### Conexión con Python
 
-Además de los nodos de control estándar, se desarrollaron scripts específicos en Python —ubicados también dentro de `phantom_ws/src`— para interactuar directamente con los tópicos y servicios de ROS 2:
+La conexión directa con ROS 2 y los servomotores se resolvió mediante scripts en Python, basados en las guías de control:
 
-- Un script publica en los tópicos de comando de cada controlador articular a partir de vectores de ángulos en grados. Antes de publicar, se validan los límites de cada junta; valores fuera del rango se saturan o se descartan, evitando comandos inválidos sobre los Dynamixel.
-- Un segundo script se suscribe a los tópicos de estado de los controladores y/o a `/joint_states`, transforma las posiciones a grados y entrega la configuración articular de 5 ángulos. Esta información se aprovechó para:
-  - Depurar el comportamiento de los controladores.
-  - Alimentar la HMI con la lectura en tiempo real de las juntas.
-  - Comparar los valores medidos en el robot real frente a los valores usados en simulación (RViz2/MoveIt).
+- Nodo `pincher_control` con `dynamixel_sdk` y `rclpy` de la Guía 04:  
+  [`ROB_Intro_ROS2_Humble_Phantom_Pincher_X100`](https://github.com/labsir-un/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100)
+- Extensiones con publicación de `/joint_states` y GUI en Tkinter de la Guía 05:  
+  [`ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_RVIZ`](https://github.com/labsir-un/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_RVIZ)
 
-Ambos scripts se integraron al árbol de paquetes del workspace, de forma que pueden ejecutarse mediante `ros2 run` desde el propio repositorio del proyecto final.
+Sobre esa base se implementaron dos tipos de scripts:
+
+- **Publicadores de comando articular**  
+  Scripts que reciben vectores de ángulos \([q_1, \dots, q_5]\) en grados, los convierten a unidades de los Dynamixel (0–4095 o radianes, según configuración), verifican los límites de cada junta y publican en los tópicos de control de cada articulación.
+
+- **Lectores de estado articular**  
+  Scripts suscriptores a `/joint_states` y/o a los tópicos de estado de los controladores, que leen las posiciones actuales articular por articular, las convierten a grados y devuelven la configuración \([q_1, \dots, q_5]\). Estos scripts alimentan la HMI, permiten diagnosticar el comportamiento de los servos y sirven de puente entre el robot real y el modelo cinemático usado en el toolbox.
+
+Todos estos scripts se integraron en `phantom_ws/src` dentro del repositorio `robotica-proyecto-final`, manteniendo la misma lógica de paquetes e `entry_points` que las guías de referencia.
 
 ### Python + ROS + Toolbox
 
-Se añadió un módulo en Python que conecta ROS 2 con un toolbox de robótica (entorno de cálculo) para representar el manipulador a partir de la tabla DH:
+Sobre la tabla DH construida al inicio se desarrolló un módulo de Python que integra:
 
-1. Se utilizó la tabla DH obtenida en la sección de análisis para construir el modelo cinemático directo del Phantom X Pincher.
-2. El script recibe como entrada un vector \([q_1, q_2, q_3, q_4, q_5]\), en grados o radianes, y lo adapta a la convención del toolbox (offsets y signos).
-3. A partir de este vector, el modelo calcula la pose cartesiana del TCP (posición y orientación) y genera una gráfica 3D de la configuración del robot.
-4. La representación en el toolbox se sincronizó con los valores articulares que llegan desde ROS 2, permitiendo comparar:
-   - La pose digital en el toolbox.
-   - La pose mostrada en RViz2/MoveIt.
-   - La pose físicamente alcanzada por el Phantom X Pincher.
+- El modelo cinemático directo del Phantom X Pincher.
+- La lectura de configuraciones articulares desde ROS 2.
+- La representación gráfica del manipulador en un entorno 3D tipo toolbox de robótica.
 
-Este módulo se integró al repositorio como parte del flujo de verificación de la solución.
+Este módulo adopta la nomenclatura de juntas (`waist`, `shoulder`, `elbow`, `wrist`, `gripper`) y el rango de movimiento que se documentan en las guías del kit y en el paquete `pincher_description`, de forma que:
+
+1. Se recibe un vector \([q_1, q_2, q_3, q_4, q_5]\) (en grados o radianes) y se corrigen offsets y signos según la convención usada en los Dynamixel.
+2. Se calcula la pose cartesiana del TCP (posición y orientación RPY).
+3. Se genera una gráfica 3D de la configuración, comparable con la visualización en RViz/MoveIt 2.
+4. Se actualiza la figura en función de las lecturas de `/joint_states`, permitiendo comparar la pose digital (toolbox) con la pose real del manipulador.
 
 ### Poses de prueba
 
-Durante la práctica se ensayaron múltiples configuraciones articulares para validar tanto el modelo como la interfaz de control y la configuración de MoveIt 2. En particular, se comprobaron las siguientes poses generadas a partir de los valores \((q_1, q_2, q_3, q_4, q_5)\) en grados:
+Para validar el modelo, la configuración de MoveIt 2 y la implementación de los nodos de control, se ensayaron de forma sistemática las siguientes configuraciones articulares \((q_1, q_2, q_3, q_4, q_5)\) en grados:
 
-1. \(0, 0, 0, 0, 0\)
-2. \(25, 25, 20, -20, 0\)
-3. \(-35, 35, -30, 30, 0\)
-4. \(85, -20, 55, 25, 0\)
+1. \(0, 0, 0, 0, 0\)  
+2. \(25, 25, 20, -20, 0\)  
+3. \(-35, 35, -30, 30, 0\)  
+4. \(85, -20, 55, 25, 0\)  
 5. \(80, -35, 55, -45, 0\)
 
-Para cada caso se verificó que los ángulos se mantuvieran dentro de los límites articulares definidos por los servomotores, que las trayectorias propuestas por MoveIt 2 fueran libres de colisión y que el movimiento no generara interferencias con la mesa de trabajo ni con otros elementos del entorno.
+Cada una de estas poses se probó:
+
+- En el robot físico, verificando que ninguna articulación excediera sus límites y que no hubiera interferencia con la mesa ni con otros elementos.
+- En MoveIt 2, comprobando la existencia de soluciones cinemáticas y trayectorias libres de colisión.
+- En la representación del toolbox, comparando la pose cartesiana calculada con la que observa el operador en RViz.
 
 ### Interfaz de Usuario (HMI)
 
-Como parte del proyecto final se desarrolló una interfaz gráfica (HMI) en Python, incluida dentro del workspace `phantom_ws/src`, que centraliza las principales funciones de operación del manipulador, la visualización y la interacción con MoveIt 2:
+La HMI desarrollada en el proyecto está fuertemente inspirada en la interfaz Tkinter descrita en la Guía 05 del repositorio de RViz, donde se propone una ventana con pestañas para:
 
-1. **Identificación del grupo**  
-   Se preparó un panel con los nombres, logos y datos de contacto de los integrantes del grupo, visible al iniciar la aplicación.
+- Sliders de control en tiempo real.
+- Entrada numérica de comandos.
+- Lanzamiento y cierre de RViz desde botones dedicados.
+
+Tomando como punto de partida esa estructura, la HMI del proyecto final (ubicada en `phantom_ws/src` de `robotica-proyecto-final`) se extendió para incluir:
+
+1. **Panel de identificación**  
+   Muestra nombres, logos y datos de contacto de los integrantes del grupo, siguiendo la estética institucional del curso.
+
 2. **Visualización de la última posición enviada**  
-   La HMI muestra una imagen o captura asociada a la última configuración enviada al manipulador (tanto de la simulación como del robot real), facilitando la documentación de resultados.
+   Incluye una imagen/captura asociada a la última configuración enviada al robot (ya sea foto del manipulador o captura de RViz), utilizada también para documentar resultados.
+
 3. **Selección de poses predefinidas**  
-   Se incorporaron botones para seleccionar cualquiera de las cinco poses de prueba y enviarlas al robot con un solo clic, reutilizando los mismos vectores articulares empleados en los scripts de ROS 2 y en MoveIt 2.
-4. **Lectura de ángulos articulares**  
-   Se despliega en tiempo real el valor actual de cada ángulo articular, a partir de las lecturas de los tópicos de estado y/o `/joint_states`.
+   Botones que cargan directamente las cinco poses de prueba y envían los vectores articulares correspondientes al nodo de control, reutilizando la misma lógica que se describe en los scripts de `pincher_control`.
+
+4. **Lectura de ángulos articulares en tiempo real**  
+   Un panel numérico que muestra la lectura actual de cada junta a partir de `/joint_states`, sincronizada con el movimiento del robot.
+
 5. **Visualización de la posición actual**  
-   Se presenta una segunda imagen o panel asociado a la pose actual del manipulador, permitiendo comparar instantáneamente la referencia enviada con la posición realmente alcanzada.
+   Un área gráfica que refleja la pose actual del manipulador, facilitando la comparación entre el comando enviado y la configuración realmente alcanzada.
 
 ### Funcionalidades de la interfaz gráfica
 
-La interfaz se organizó en varias pestañas, cada una enfocada en un modo de operación específico:
+La HMI se organizó en varias pestañas, ampliando las ideas de la GUI original de `pincher_control`:
 
 - **Pestaña de control en espacio articular**  
-  Incluye deslizadores para cada articulación, configurados con los límites mínimos y máximos permitidos. Al modificar un slider, la HMI:
-  1. Actualiza el valor numérico correspondiente.
-  2. Publica el comando articular hacia el nodo de control.
-  3. Fuerza la actualización de la visualización del robot en RViz2/MoveIt y en la vista de la HMI.
+  Contiene sliders para cada articulación, con límites configurados según las especificaciones del Phantom. Al mover un slider:
+  1. Se actualiza el valor numérico mostrado.
+  2. Se envía el comando articular vía ROS 2 al nodo de control.
+  3. Se actualiza en paralelo la visualización en RViz/MoveIt y en la propia HMI.
 
 - **Pestaña de ingreso numérico articular**  
-  Permite al operador introducir directamente los valores de \(q_1\) a \(q_5\) en grados mediante campos de texto. Antes de enviar el comando:
-  1. Se verifican los rangos de cada junta.
-  2. En caso de error, se notifica al usuario o se ajusta el valor al límite más cercano.
-  3. Se actualizan de forma coherente la visualización del robot y los valores numéricos mostrados.
+  Permite escribir directamente los valores de \(q_1\) a \(q_5\) en grados. Antes de publicar:
+  1. Se validan los rangos de seguridad.
+  2. Se corrigen o se rechazan valores fuera de rango.
+  3. Se sincronizan tanto la vista de RViz como los indicadores numéricos.
 
 - **Pestaña de control en el espacio de la tarea**  
-  Ofrece controles para manipular el TCP del robot en coordenadas \(X, Y, Z\) y orientación RPY. La HMI:
-  1. Calcula la cinemática inversa para obtener una solución articular.
-  2. Comprueba la alcanzabilidad y el cumplimiento de límites.
-  3. Publica la nueva configuración articular en ROS 2 y actualiza la simulación.
+  Brinda controles para desplazar el TCP en \(X, Y, Z\) y ajustar la orientación en RPY. Internamente:
+  1. Se resuelve la cinemática inversa con el modelo DH.
+  2. Se comprueba la alcanzabilidad y el cumplimiento de límites.
+  3. Se envía la nueva configuración articular al robot real y a la simulación.
 
 - **Pestaña de visualización en RViz/MoveIt**  
-  Desde esta pestaña se lanzan o detienen RViz2 y la escena de MoveIt utilizando los archivos de lanzamiento del workspace. El modelo del Phantom X Pincher se actualiza con los valores publicados en `/joint_states`, de modo que el movimiento del robot físico se refleja inmediatamente en la escena 3D.
+  Reutiliza la lógica propuesta en la Guía 05 para lanzar y cerrar RViz desde la propia HMI, ejecutando comandos tipo `ros2 launch pincher_description display.launch.py`. El modelo del Phantom se actualiza con los valores de `/joint_states`, logrando una visualización sincronizada del movimiento real.
 
 - **Pestaña de visualización numérica de la pose cartesiana**  
-  Presenta en tiempo real la posición \(X, Y, Z\) y la orientación en términos de Roll–Pitch–Yaw del TCP del robot. Estos valores se obtienen a partir del modelo cinemático y de la configuración actual de las articulaciones, permitiendo una validación cuantitativa de la pose lograda tanto en la simulación como en el robot real.
+  Muestra en tiempo real la posición \(X, Y, Z\) y la orientación (Roll–Pitch–Yaw) del TCP calculadas a partir del modelo cinemático y de la configuración articular actual. Esta información es clave para comparar resultados entre:
+  - El modelo analítico (toolbox).
+  - La simulación en RViz/MoveIt.
+  - El comportamiento del robot físico.
+
+En conjunto, el desarrollo del laboratorio se apoya en los siguientes repositorios de referencia, de los cuales se adaptaron estructuras de paquetes, modelos 3D, nodos de control, guías de configuración y ejemplos de GUI:
+
+- [`KIT_Phantom_X_Pincher_ROS2`](https://github.com/labsir-un/KIT_Phantom_X_Pincher_ROS2)  
+- [`ROB_Intro_ROS2_Humble_Phantom_Pincher_X100`](https://github.com/labsir-un/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100)  
+- [`ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_RVIZ`](https://github.com/labsir-un/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_RVIZ)  
+- [`3DModels_KIT_Phantom_Pincher_X100`](https://github.com/labsir-un/3DModels_KIT_Phantom_Pincher_X100)  
+- [`ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_Updated/guias/Setup`](https://github.com/ElJoho/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_Updated/tree/jazzy/guias/Setup)  
+- [`ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_Updated/guias/Moveit`](https://github.com/ElJoho/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_Updated/tree/jazzy/guias/Moveit)  
+- [`sergiosinlimites/robotica-proyecto-final/phantom_ws/src`](https://github.com/sergiosinlimites/robotica-proyecto-final/tree/main/phantom_ws/src)
+
 
 
 
