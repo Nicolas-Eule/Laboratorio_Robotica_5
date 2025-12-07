@@ -368,14 +368,12 @@ En conjunto, el desarrollo del laboratorio se apoya en los siguientes repositori
 - [`sergiosinlimites/robotica-proyecto-final/phantom_ws/src`](https://github.com/sergiosinlimites/robotica-proyecto-final/tree/main/phantom_ws/src)
 
 
+---
+## Plano de planta de la ubicación de cada uno de los elementos
+---
+## Diagrama de flujo de acciones del robot utilizando la herramienta Mermaid
 
 
-## Entregables
-1. Descripción detallada de la solución planteada.
-2. Diagrama de flujo de acciones del robot utilizando la herramienta Mermaid.
-3. Plano de planta de la ubicación de cada uno de los elementos.
-4. Descripción de las funciones utilizadas.
-5. Código del script utilizado para el desarrollo de la práctica.
 
 
 
