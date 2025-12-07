@@ -77,6 +77,17 @@ Se incluyen tópicos de movimiento para las articulaciones, la conexión con los
 
 ---
 
+---
+
+## Video de simulación y entorno físico
+
+Video donde se evidencia la simulación en RViz y el comportamiento del robot en el entorno físico (poses y uso de la interfaz gráfica):
+
+[![Video de simulación y entorno físico](https://img.youtube.com/vi/65TIC8xtnyM/0.jpg)](https://youtu.be/65TIC8xtnyM)
+
+
+---
+
 # Laboratorio 5 - Pincher Phantom X100 - ROS Humble - RVIZ
 
 ## Objetivos del laboratorio
@@ -98,17 +109,6 @@ Se incluyen tópicos de movimiento para las articulaciones, la conexión con los
 - Paquete del robot Phantom X: [Phantom X GitHub](https://github.com/labsir-un/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_RVIZ.git)
 - Python.
 - Un manipulador Phantom X Pincher con su entorno de trabajo.
-
----
-
-## Video de simulación y entorno físico
-
-Video donde se evidencia la simulación en RViz y el comportamiento del robot en el entorno físico (poses y uso de la interfaz gráfica):
-
-[![Video de simulación y entorno físico](https://img.youtube.com/vi/65TIC8xtnyM/0.jpg)](https://youtu.be/65TIC8xtnyM)
-
-
----
 
 
 ## Desarrollo del ejercicio en el laboratorio
