@@ -194,13 +194,4 @@ Video donde se evidencia la simulación en RViz y el comportamiento del robot en
 
 ---
 
-## Requisitos de software y hardware
-
-- **Sistema operativo:** Ubuntu 22.xx (preferiblemente **22.04 LTS**) con **ROS 2 Humble** instalado.
-- **Espacio de trabajo ROS 2** configurado para compilar con `colcon build`.
-- **Paquetes de Dynamixel Workbench:**
-6. Video del brazo alcanzando cada posición solicitada.
-7. Video demostración de uso de la interfaz de usuario.
-8. Gráfica digital de las poses comparándola con la fotografía del brazo real en la misma configuración.
-
 
