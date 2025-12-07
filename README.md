@@ -119,21 +119,21 @@ A partir de las medidas definitivas se elaboró un diagrama esquemático análog
 
 ### Tabla de parámetros Denavit–Hartenberg del manipulador
 
-La siguiente tabla resume el modelo cinemático del brazo utilizado en el laboratorio, construido a partir de la posición HOME mostrada en el esquema (eslabones verticales L₁, L₂, L₃ y L₄).  
-Los parámetros \(d_i\) y \(a_i\) se expresan en función de las longitudes medidas de cada eslabón, mientras que los ángulos \(\alpha_i\) corresponden a la rotación entre ejes \(z_i\) y \(z_{i+1}\).  
-La columna **offset** indica el desplazamiento angular fijo que se suma a \(\theta_i\) para que la postura HOME coincida con la configuración física del robot.
+La siguiente tabla resume el modelo cinemático del brazo utilizado en el laboratorio, construido a partir de la posición HOME (eslabones verticales L₁, L₂, L₃ y L₄).  
+Los parámetros dᵢ y aᵢ se expresan en función de las longitudes medidas de cada eslabón, mientras que los ángulos αᵢ corresponden a la rotación entre los ejes zᵢ y zᵢ₊₁.  
+La columna **Offset** indica el desplazamiento angular fijo que se suma a θᵢ para que la postura HOME coincida con la configuración física del robot.
 
-| Junta \(i\) | \(\theta_i\) | \(d_i\) | \(a_i\) | \(\alpha_i\) | Offset |
-|------------|-------------|--------|--------|-------------|--------|
-| 1 | \(\theta_1\) | \(L_1\) | \(0\)   | \(-90^\circ\) | \(-90^\circ\) |
-| 2 | \(\theta_2\) | \(0\)   | \(L_2\) | \(0^\circ\)   | \(-80^\circ\) |
-| 3 | \(\theta_3\) | \(0\)   | \(L_3\) | \(0^\circ\)   | \(0^\circ\)   |
-| 4 | \(\theta_4\) | \(0\)   | \(L_4\) | \(0^\circ\)   | \(0^\circ\)   |
+| Junta i | θᵢ  | dᵢ  | aᵢ  | αᵢ   | Offset |
+|--------|-----|-----|-----|------|--------|
+| 1      | θ₁  | L₁  | 0   | −90° | −90°   |
+| 2      | θ₂  | 0   | L₂  | 0°   | −80°   |
+| 3      | θ₃  | 0   | L₃  | 0°   | 0°     |
+| 4      | θ₄  | 0   | L₄  | 0°   | 0°     |
 
 > Nota: en el diagrama de HOME se midieron aproximadamente  
-> \(L_1 = 4{,}5\ \text{cm}\), \(L_2 = 10{,}7\ \text{cm}\),  
-> \(L_3 = 10{,}7\ \text{cm}\) y \(L_4 = 10{,}88\ \text{cm}\).  
+> L₁ = 4,5 cm, L₂ = 10,7 cm, L₃ = 10,7 cm y L₄ = 10,88 cm.  
 > Estos valores pueden utilizarse tanto en el toolbox de robótica como en los modelos URDF/XACRO del robot.
+
 
 
 ### Análisis
