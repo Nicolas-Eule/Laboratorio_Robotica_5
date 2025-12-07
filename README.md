@@ -173,7 +173,7 @@ Video donde se evidencia la simulación en RViz y el comportamiento del robot en
 
 ---
 
-## 🧱 Requisitos de software y hardware
+## Requisitos de software y hardware
 
 - **Sistema operativo:** Ubuntu 22.xx (preferiblemente **22.04 LTS**) con **ROS 2 Humble** instalado.
 - **Espacio de trabajo ROS 2** configurado para compilar con `colcon build`.
