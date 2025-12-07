@@ -99,6 +99,18 @@ Se incluyen tópicos de movimiento para las articulaciones, la conexión con los
 - Python.
 - Un manipulador Phantom X Pincher con su entorno de trabajo.
 
+---
+
+## Video de simulación y entorno físico
+
+Video donde se evidencia la simulación en RViz y el comportamiento del robot en el entorno físico (poses y uso de la interfaz gráfica):
+
+[![Video de simulación y entorno físico](https://img.youtube.com/vi/65TIC8xtnyM/0.jpg)](https://youtu.be/65TIC8xtnyM)
+
+
+---
+
+
 ## Desarrollo del ejercicio en el laboratorio
 
 ### Mediciones
@@ -366,15 +378,5 @@ En conjunto, el desarrollo del laboratorio se apoya en los siguientes repositori
 5. Código del script utilizado para el desarrollo de la práctica.
 
 
----
-
-## Video de simulación y entorno físico
-
-Video donde se evidencia la simulación en RViz y el comportamiento del robot en el entorno físico (poses y uso de la interfaz gráfica):
-
-[![Video de simulación y entorno físico](https://img.youtube.com/vi/65TIC8xtnyM/0.jpg)](https://youtu.be/65TIC8xtnyM)
-
-
----
 
 
