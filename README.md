@@ -111,6 +111,12 @@ En particular, se revisaron las carpetas asociadas al **Phantom X Pincher** y al
 
 A partir de las medidas definitivas se elaboró un diagrama esquemático análogo al de la Figura 2 de la guía, rotulando cada eslabón, su longitud efectiva y la posición relativa de las juntas.
 
+
+![Posicion_Home](https://github.com/user-attachments/assets/15f08f85-9d68-445b-8a68-e5012e64596a)
+
+![Modelado](https://github.com/user-attachments/assets/feb1e75e-651d-48e9-869d-ef925b694ff7)
+
+
 ### Análisis
 
 Con las dimensiones finales se construyó la tabla de parámetros Denavit–Hartenberg (DH) del Phantom X Pincher, siguiendo la convención de marcos utilizada en los ejemplos de ROS 2 para este robot. La asignación de marcos y los nombres de las juntas (`waist`, `shoulder`, `elbow`, `wrist`, `gripper`) se alinearon con la estructura propuesta en los paquetes de descripción y control del ecosistema Phantom:
