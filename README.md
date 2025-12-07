@@ -117,6 +117,25 @@ A partir de las medidas definitivas se elaboró un diagrama esquemático análog
 ![Modelado](https://github.com/user-attachments/assets/feb1e75e-651d-48e9-869d-ef925b694ff7)
 
 
+### Tabla de parámetros Denavit–Hartenberg del manipulador
+
+La siguiente tabla resume el modelo cinemático del brazo utilizado en el laboratorio, construido a partir de la posición HOME mostrada en el esquema (eslabones verticales L₁, L₂, L₃ y L₄).  
+Los parámetros \(d_i\) y \(a_i\) se expresan en función de las longitudes medidas de cada eslabón, mientras que los ángulos \(\alpha_i\) corresponden a la rotación entre ejes \(z_i\) y \(z_{i+1}\).  
+La columna **offset** indica el desplazamiento angular fijo que se suma a \(\theta_i\) para que la postura HOME coincida con la configuración física del robot.
+
+| Junta \(i\) | \(\theta_i\) | \(d_i\) | \(a_i\) | \(\alpha_i\) | Offset |
+|------------|-------------|--------|--------|-------------|--------|
+| 1 | \(\theta_1\) | \(L_1\) | \(0\)   | \(-90^\circ\) | \(-90^\circ\) |
+| 2 | \(\theta_2\) | \(0\)   | \(L_2\) | \(0^\circ\)   | \(-80^\circ\) |
+| 3 | \(\theta_3\) | \(0\)   | \(L_3\) | \(0^\circ\)   | \(0^\circ\)   |
+| 4 | \(\theta_4\) | \(0\)   | \(L_4\) | \(0^\circ\)   | \(0^\circ\)   |
+
+> Nota: en el diagrama de HOME se midieron aproximadamente  
+> \(L_1 = 4{,}5\ \text{cm}\), \(L_2 = 10{,}7\ \text{cm}\),  
+> \(L_3 = 10{,}7\ \text{cm}\) y \(L_4 = 10{,}88\ \text{cm}\).  
+> Estos valores pueden utilizarse tanto en el toolbox de robótica como en los modelos URDF/XACRO del robot.
+
+
 ### Análisis
 
 Con las dimensiones finales se construyó la tabla de parámetros Denavit–Hartenberg (DH) del Phantom X Pincher, siguiendo la convención de marcos utilizada en los ejemplos de ROS 2 para este robot. La asignación de marcos y los nombres de las juntas (`waist`, `shoulder`, `elbow`, `wrist`, `gripper`) se alinearon con la estructura propuesta en los paquetes de descripción y control del ecosistema Phantom:
