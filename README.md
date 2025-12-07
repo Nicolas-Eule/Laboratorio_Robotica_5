@@ -77,16 +77,19 @@ Se incluyen tópicos de movimiento para las articulaciones, la conexión con los
 
 ---
 
-
-
-
 # Laboratorio 5 - Pincher Phantom X100 - ROS Humble - RVIZ
 
-## Objetivos
+## Objetivos del laboratorio
+
 1. **Crear todos los Joint Controllers** con ROS para manipular servomotores Dynamixel AX-12 del robot Phantom X Pincher.
-2. **Manipular los tópicos de estado y comando** para todos los Joint Controllers del robot Phantom X Pincher.
-3. **Manipular los servicios** para todos los Joint Controllers del robot Phantom X Pincher.
-4. **Conectar el robot Phantom X Pincher con Python usando ROS 2**.
+2. **Manipular los tópicos de estado y comando** para todos los Joint Controllers del robot, entendiendo la diferencia entre:
+   - Tópicos de *estado* (lectura de posición, velocidad, corriente, etc.).
+   - Tópicos de *comando* (referencias de posición/velocidad para cada articulación).
+3. **Manipular servicios ROS 2** asociados a los Joint Controllers (por ejemplo, habilitar/deshabilitar torque, reiniciar controladores o mover a la posición *home*).
+4. **Conectar el robot Phantom X Pincher con Python usando ROS 2**, de forma que:
+   - Pueda enviarse una configuración articular desde Python al robot.
+   - Se reciba el estado articular para validación y visualización.
+   - Se integre con herramientas de modelado (toolbox) para graficar la configuración.
 
 ## Requisitos
 - Ubuntu versión 22.xx preferible 22.04 LTS con ROS Humble.
@@ -94,51 +97,83 @@ Se incluyen tópicos de movimiento para las articulaciones, la conexión con los
 - Paquetes de Dynamixel Workbench: [Dynamixel Workbench GitHub](https://github.com/labsir-un/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100.git)
 - Paquete del robot Phantom X: [Phantom X GitHub](https://github.com/labsir-un/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_RVIZ.git)
 - Python.
-- Un (1) manipulador Phantom X Pincher con su entorno de trabajo.
+- Un manipulador Phantom X Pincher con su entorno de trabajo.
 
-## Ejercicio en el laboratorio
-Cada grupo tendrá a cargo un robot Phantom X Pincher. Siga las indicaciones del laboratorista y profesores para hacer buen uso de los robots del laboratorio.
+## Desarrollo del ejercicio en el laboratorio
 
 ### Mediciones
-Establezca las longitudes de eslabón para cada articulación del robot Phantom X Pincher usando un calibrador. Genere un diagrama con los datos medidos, como el ejemplo presentado en la figura 2 de la guía.
+
+Se determinaron las longitudes de eslabón de cada articulación del robot Phantom X Pincher utilizando un calibrador digital. Para ello se definieron referencias fijas en la base y en cada junta, y se registraron las distancias entre ejes consecutivos. Con estos datos se elaboró un diagrama esquemático del manipulador, análogo al presentado en la Figura 2 de la guía, donde se consignaron los nombres de los eslabones y sus dimensiones efectivas.
 
 ### Análisis
-Con las dimensiones medidas, obtenga los parámetros DH del robot Phantom X Pincher. Genere un diagrama del robot con las tablas de parámetros articulares utilizando software de ilustración.
 
-### ROS 2
-Cree un script en ROS 2 que publique a los tópicos y llame a los servicios correspondientes para realizar el movimiento de cada una de las articulaciones del manipulador (waist, shoulder, elbow, wrist). La lógica del script debe ser la siguiente:
-1. Realice el movimiento entre dos posiciones angulares características: una de home y otra objetivo.
-2. El movimiento de las articulaciones debe realizarse de forma secuencial, comenzando por la articulación de la base. Agregue una pequeña espera entre cada movimiento.
+A partir de las dimensiones medidas se construyó la tabla de parámetros Denavit–Hartenberg (DH) del Phantom X Pincher. Para cada junta se establecieron los parámetros \(a_i\), \(\alpha_i\), \(d_i\) y \(\theta_i\) en coherencia con la asignación de marcos de referencia utilizada en el modelo de simulación. Con esta información se generó un diagrama del robot que incluye la tabla DH y los sistemas de coordenadas por junta, verificando la compatibilidad con el modelo cinemático usado posteriormente en los paquetes de descripción y control.
+
+### Implementación en ROS 2
+
+Siguiendo la estructura de los paquetes de control para PhantomX en ROS 2, se trabajó sobre un workspace tipo `phantom_ws` en el que se creó y configuró el paquete de control en Python para el robot. Dentro de este paquete se desarrolló un nodo ROS 2 que:
+
+1. Inicializa la comunicación con los servomotores Dynamixel AX-12 a través del puerto serie configurado para el bus del robot.
+2. Publica los comandos de posición para cada articulación (waist, shoulder, elbow, wrist y gripper) usando los tópicos de control definidos en el workspace.
+3. Ejecuta una secuencia de movimiento entre dos configuraciones articulares características: una configuración de **home** y una configuración **objetivo**.
+4. Realiza el movimiento de forma secuencial, comenzando por la articulación de la base y continuando hacia las articulaciones distales, insertando pausas breves entre cada cambio articular para asegurar una transición suave y claramente observable.
+
+Esta lógica se integró con el paquete de descripción del robot, de manera que la misma información articular que se envía al manipulador se utiliza también para actualizar la visualización en RViz a través del tópico `/joint_states`.
 
 ### Conexión con Python
-Cree un script en Python que publique en cada tópico de controlador de articulación y valide los límites articulares de cada junta. También, cree un script para suscribirse a los tópicos de controlador de articulación y retornar la configuración de 5 ángulos en grados.
+
+Además del nodo principal de control, se desarrollaron scripts en Python que interactúan directamente con los tópicos y servicios de ROS 2:
+
+- Un script publica en los tópicos de comando de cada controlador de articulación, recibiendo como entrada un conjunto de ángulos articulares en grados. Previo al envío, se realiza la validación de límites para cada junta, saturando o rechazando valores que excedan los rangos permitidos por los servomotores.
+- Un segundo script se suscribe a los tópicos de estado de los controladores, recupera las posiciones articulares actuales, las convierte a grados y retorna la configuración resultante de 5 ángulos. Estas lecturas se usan tanto para depuración como para la actualización de la HMI y para comparar el estado real con la simulación.
 
 ### Python + ROS + Toolbox
-Cree un código en Python que envíe la posición en ángulos deseada a cada articulación del robot utilizando ROS + Dynamixel. El programa debe graficar la configuración del robot usando las herramientas del toolbox, y esta configuración debe coincidir con la obtenida en el robot real.
 
-### Pruebe las siguientes poses generadas a partir de los valores articulares de q1, q2, q3, q4, q5:
-1. 0, 0, 0, 0, 0.
-2. 25, 25, 20, -20, 0.
-3. -35, 35, -30, 30, 0.
-4. 85, -20, 55, 25, 0.
-5. 80, -35, 55, -45, 0.
+Se implementó un código adicional en Python que integra ROS 2 con un toolbox de robótica para la representación del manipulador. Este script:
 
-Asegúrese de que las poses no interfieran con los límites articulares ni con algún objeto en el espacio de trabajo.
+1. Utiliza la tabla DH obtenida en la sección de análisis para construir el modelo cinemático del Phantom X Pincher.
+2. Recibe como entrada un vector articular \([q_1, q_2, q_3, q_4, q_5]\) (en grados o radianes, según la configuración).
+3. Grafica la configuración del robot en un entorno 3D utilizando las herramientas del toolbox, mostrando la posición y orientación del TCP.
+4. Sincroniza esta representación con los valores articulares leídos desde ROS 2, de modo que la pose digital coincida con la pose del robot real.
+
+Los modelos 3D del robot (mallas `.stl` de base, hombro, brazo, antebrazo y gripper) se integraron en el paquete de descripción para que la visualización en RViz y la del toolbox representen fielmente el hardware utilizado en el laboratorio.
+
+### Poses de prueba
+
+Durante la práctica se ensayaron múltiples configuraciones articulares para validar tanto el modelo como la interfaz de control. En particular, se comprobaron las siguientes poses generadas a partir de los valores \((q_1, q_2, q_3, q_4, q_5)\) en grados:
+
+1. \(0, 0, 0, 0, 0\)
+2. \(25, 25, 20, -20, 0\)
+3. \(-35, 35, -30, 30, 0\)
+4. \(85, -20, 55, 25, 0\)
+5. \(80, -35, 55, -45, 0\)
+
+Para cada caso se verificó que los ángulos se mantuvieran dentro de los límites articulares definidos por los servomotores y que el movimiento no generara colisiones con la mesa de trabajo ni con otros elementos del entorno.
 
 ### Interfaz de Usuario (HMI)
-Desarrolle una interfaz gráfica (HMI) que muestre:
-1. Nombres, logos y datos de los integrantes del grupo.
-2. Imagen de la perspectiva de la posición actual del manipulador con la última posición enviada.
-3. Opción para seleccionar una de las 5 poses y enviarlas al manipulador.
-4. Valores reales de los ángulos articulares de cada motor.
-5. Imagen de la perspectiva de la posición actual del manipulador con los valores articulares.
+
+Se desarrolló una interfaz gráfica (HMI) en Python que centraliza las principales funciones de operación del manipulador y su visualización. La HMI incluye:
+
+1. Un panel de identificación con los nombres, logos y datos de contacto de los integrantes del grupo.
+2. Un área donde se muestra la imagen o captura de la perspectiva de la última posición enviada al manipulador, tomada ya sea de la simulación o de fotografías del robot real.
+3. Controles para seleccionar cualquiera de las cinco poses predefinidas y enviarlas al robot con un solo clic.
+4. Un bloque de lectura numérica que presenta en tiempo real los valores articulares actuales de cada motor, a partir de los tópicos de estado.
+5. Una segunda imagen que refleja la posición actual del manipulador asociada a los valores articulares medidos, permitiendo comparar inmediatamente la referencia enviada con la posición realmente alcanzada.
 
 ### Funcionalidades de la interfaz gráfica
-- **Pestaña de control en espacio articular**: Use deslizadores para mover el robot en el espacio articular.
-- **Pestaña de ingreso numérico articular**: Permita mover cada articulación a un valor determinado por el operador, respetando los límites articulares.
-- **Pestaña de control en el espacio de la tarea**: Permita mover el robot en el espacio de la tarea, controlando el TCP del robot a lo largo de los ejes X, Y, Z y rotarlo.
-- **Pestaña de visualización en RViz**: Visualice el modelo del robot en RViz y sincronice los movimientos en tiempo real con el manipulador real.
-- **Pestaña de visualización numérica de la pose cartesiana**: Muestre la posición en X, Y, Z y la orientación en Roll-Pitch-Yaw (RPY) del TCP del robot en tiempo real.
+
+La interfaz se organizó en varias pestañas, cada una enfocada en un modo de operación específico:
+
+- **Pestaña de control en espacio articular**: Se incluyeron deslizadores (sliders) para cada articulación, configurados con los límites mínimos y máximos permitidos. Al modificar un slider, la HMI actualiza el valor numérico correspondiente y envía el comando articular a través del nodo de control, actualizando en paralelo la visualización del robot.
+
+- **Pestaña de ingreso numérico articular**: Se habilitaron campos de entrada para que el operador pueda escribir directamente los valores de \(q_1\) a \(q_5\) en grados. Antes de publicar el comando, la aplicación verifica que los valores se encuentren dentro de los rangos válidos; en caso contrario, informa el error o ajusta el valor al límite más cercano.
+
+- **Pestaña de control en el espacio de la tarea**: Se implementaron controles para manipular el TCP del robot en coordenadas cartesiano-orientacionales (X, Y, Z y ángulos RPY). La HMI calcula la configuración articular mediante la cinemática inversa y, si la solución es alcanzable y segura, envía la nueva configuración al manipulador y a la visualización.
+
+- **Pestaña de visualización en RViz**: Desde esta pestaña se puede lanzar y cerrar RViz directamente desde la interfaz, utilizando el archivo de lanzamiento del paquete de descripción. El modelo del Phantom X Pincher se actualiza en tiempo real con los valores publicados en `/joint_states`, de manera que el movimiento del robot físico se refleja inmediatamente en la escena 3D.
+
+- **Pestaña de visualización numérica de la pose cartesiana**: Finalmente, se dispuso un panel donde se muestra en tiempo real la posición \(X, Y, Z\) y la orientación en términos de Roll–Pitch–Yaw del TCP del robot. Estos valores se calculan a partir del modelo cinemático y permiten validar cuantitativamente la pose alcanzada tanto en el espacio de la tarea como en la simulación.
+
 
 ## Entregables
 1. Descripción detallada de la solución planteada.
@@ -156,20 +191,6 @@ Video donde se evidencia la simulación en RViz y el comportamiento del robot en
 
 [![Video de simulación y entorno físico](https://img.youtube.com/vi/65TIC8xtnyM/0.jpg)](https://youtu.be/65TIC8xtnyM)
 
-
----
-
-## 📌 Objetivos del laboratorio
-
-1. **Crear todos los Joint Controllers** con ROS para manipular servomotores Dynamixel AX-12 del robot Phantom X Pincher.
-2. **Manipular los tópicos de estado y comando** para todos los Joint Controllers del robot, entendiendo la diferencia entre:
-   - Tópicos de *estado* (lectura de posición, velocidad, corriente, etc.).
-   - Tópicos de *comando* (referencias de posición/velocidad para cada articulación).
-3. **Manipular servicios ROS 2** asociados a los Joint Controllers (por ejemplo, habilitar/deshabilitar torque, reiniciar controladores o mover a la posición *home*).
-4. **Conectar el robot Phantom X Pincher con Python usando ROS 2**, de forma que:
-   - Pueda enviarse una configuración articular desde Python al robot.
-   - Se reciba el estado articular para validación y visualización.
-   - Se integre con herramientas de modelado (toolbox) para graficar la configuración.
 
 ---
 
