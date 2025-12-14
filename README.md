@@ -368,10 +368,88 @@ En conjunto, el desarrollo del laboratorio se apoya en los siguientes repositori
 - [`sergiosinlimites/robotica-proyecto-final/phantom_ws/src`](https://github.com/sergiosinlimites/robotica-proyecto-final/tree/main/phantom_ws/src)
 
 ---
-## Diagrama de flujo de acciones del robot utilizando la herramienta Mermaid
+## 🔁 Diagrama de flujo completo del proyecto (Mermaid)
 
+```mermaid
+flowchart TD
+  A([Inicio del proyecto / Laboratorio 5]) --> B[Setup: Ubuntu 22.04 + ROS 2 Humble + dependencias]
+  B --> C[Crear workspace `phantom_ws` + clonar paquetes + `colcon build`]
+  C --> D[Mediciones con calibrador: longitudes L_i (distancia mínima entre juntas)]
+  D --> E[Generar diagrama de longitudes (tipo Fig. 2) y registrar cambios de geometría si aplica]
+  E --> F[Análisis: calcular parámetros DH + diagrama del robot con tabla articular]
+  F --> G[ROS 2: crear Joint Controllers (waist/shoulder/elbow/wrist + gripper)]
+  G --> H[Script ROS: publicar a tópicos + llamar servicios (torque/enable/home/etc.)]
+  H --> I[Movimiento: HOME → OBJETIVO, secuencial desde la base, con esperas entre articulaciones]
+  I --> J[Conexión con Python: script publicador (valida límites) + script suscriptor (retorna 5 ángulos en grados)]
+  J --> K[Python + ROS + Toolbox: graficar configuración y verificar que coincide con robot real]
+  K --> L[HMI: pestañas (sliders, ingreso numérico, control cartesiano, RViz, pose XYZ+RPY)]
+  L --> M[Pruebas: ejecutar 5 poses (q1..q5 respecto a HOME), evitar choques/obstáculos]
+  M --> N[Capturar evidencias: video poses + video HMI + comparación gráfica digital vs foto real]
+  N --> O([Entrega: repo GitHub con README + diagramas + código + videos + evidencias])
+```
 
+---
 
+## Diagrama de flujo de acciones del robot (Ejecución en tiempo real)
 
+```mermaid
+flowchart TD
+  %% ========== ENTRADAS ==========
+  subgraph UI[HMI / Operador]
+    UI0([Inicio / Usuario interactúa])
+    UI1[Seleccionar modo:\n1) Pose predefinida\n2) Sliders articulares\n3) Ingreso numérico\n4) Control cartesiano (TCP)]
+    UI2[Construir comando deseado:\nq* (5 ángulos) o (X,Y,Z,RPY)]
+    UIE[[Mostrar mensaje de error / advertencia]]
+  end
 
+  %% ========== PROCESAMIENTO ==========
+  subgraph CTRL[Control en Python + ROS 2]
+    C0{{¿Modo cartesiano?}}
+    IK[Resolver cinemática inversa\n→ q* candidato]
+    LIM{{¿q* dentro de límites y seguro?}}
+    HOME{{¿Orden HOME / RESET?}}
+    TORQ{{¿Torque habilitado?}}
+    EN[Solicitar servicio torque_enable]
+    CONV[Convertir q*:\n(grados/radianes) → unidades Dynamixel\n+ offsets/signos]
+    SEQ[Publicar comandos secuenciales:\nwaist → shoulder → elbow → wrist → gripper\n(+ espera entre movimientos)]
+    READ[Suscribirse/leer estados:\n`/joint_states` y/o estados de controladores]
+    DEG[Convertir estados a grados:\nq_real (5 ángulos)]
+    FK[Calcular cinemática directa:\nTCP = (X,Y,Z) + (Roll,Pitch,Yaw)]
+    TOL{{¿Pose alcanzada (tolerancia)?}}
+  end
+
+  %% ========== SISTEMA ROS / RVIZ ==========
+  subgraph ROS[ROS 2 + Visualización]
+    RSP[robot_state_publisher\n(publica TF con `joint_states`)]
+    RVIZ[RViz (modelo/TF/MoveIt)\nactualización en tiempo real]
+  end
+
+  %% ========== HARDWARE ==========
+  subgraph HW[Robot real: Dynamixel + USB2Dynamixel]
+    DXL[Servomotores ejecutan comandos]
+    ERR{{¿Error de comunicación / servo?}}
+  end
+
+  %% ========== FLUJO ==========
+  UI0 --> UI1 --> UI2 --> C0
+
+  C0 -- Sí --> IK --> LIM
+  C0 -- No --> LIM
+
+  LIM -- No --> UIE --> UI1
+  LIM -- Sí --> HOME
+
+  HOME -- Sí --> CONV
+  HOME -- No --> TORQ
+
+  TORQ -- No --> EN --> TORQ
+  TORQ -- Sí --> CONV
+
+  CONV --> SEQ --> DXL --> ERR
+  ERR -- Sí --> UIE --> UI1
+  ERR -- No --> READ --> DEG --> FK --> RSP --> RVIZ --> TOL
+
+  TOL -- Sí --> UI1
+  TOL -- No --> READ
+```
 
