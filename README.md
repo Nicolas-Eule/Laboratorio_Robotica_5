@@ -368,88 +368,130 @@ En conjunto, el desarrollo del laboratorio se apoya en los siguientes repositori
 - [`sergiosinlimites/robotica-proyecto-final/phantom_ws/src`](https://github.com/sergiosinlimites/robotica-proyecto-final/tree/main/phantom_ws/src)
 
 ---
-## 🔁 Diagrama de flujo completo del proyecto (Mermaid)
+
+## 🔁 Diagrama de flujo completo del proyecto (Mermaid) — estilo guía
 
 ```mermaid
-flowchart TD
-  A([Inicio del proyecto / Laboratorio 5]) --> B[Setup: Ubuntu 22.04 + ROS 2 Humble + dependencias]
-  B --> C[Crear workspace `phantom_ws` + clonar paquetes + `colcon build`]
-  C --> D[Mediciones con calibrador: longitudes L_i (distancia mínima entre juntas)]
-  D --> E[Generar diagrama de longitudes (tipo Fig. 2) y registrar cambios de geometría si aplica]
-  E --> F[Análisis: calcular parámetros DH + diagrama del robot con tabla articular]
-  F --> G[ROS 2: crear Joint Controllers (waist/shoulder/elbow/wrist + gripper)]
-  G --> H[Script ROS: publicar a tópicos + llamar servicios (torque/enable/home/etc.)]
-  H --> I[Movimiento: HOME → OBJETIVO, secuencial desde la base, con esperas entre articulaciones]
-  I --> J[Conexión con Python: script publicador (valida límites) + script suscriptor (retorna 5 ángulos en grados)]
-  J --> K[Python + ROS + Toolbox: graficar configuración y verificar que coincide con robot real]
-  K --> L[HMI: pestañas (sliders, ingreso numérico, control cartesiano, RViz, pose XYZ+RPY)]
-  L --> M[Pruebas: ejecutar 5 poses (q1..q5 respecto a HOME), evitar choques/obstáculos]
-  M --> N[Capturar evidencias: video poses + video HMI + comparación gráfica digital vs foto real]
-  N --> O([Entrega: repo GitHub con README + diagramas + código + videos + evidencias])
+---
+config:
+  theme: redux
+---
+flowchart TB
+    n1(["Inicio<br>Laboratorio 5"]) --> n2["Preparar entorno<br><code>Ubuntu 22.04</code> + <code>ROS 2 Humble</code>"]
+    n2 --> n3["Crear workspace<br><code>phantom_ws</code>"]
+    n3 --> n4["Clonar paquetes base<br><code>pincher_description</code>, <code>pincher_control</code>, RViz/MoveIt"]
+    n4 --> n5["Instalar dependencias<br><code>rosdep</code>, <code>dynamixel_sdk</code>, permisos <code>dialout</code>"]
+    n5 --> n6{"¿<code>colcon build</code> compila sin errores?"}
+    n6 -- NO --> n7["Corregir dependencias / rutas / permisos<br>Reintentar build"]
+    n7 --> n6
+    n6 -- SÍ --> n8["Medir eslabones con calibrador<br>obtener <code>L1..L4</code> (distancia entre juntas)"]
+    n8 --> n9["Construir esquema del robot<br>Longitudes + ejes de rotación (HOME)"]
+    n9 --> n10["Calcular tabla DH<br><code>a_i</code>, <code>d_i</code>, <code>alpha_i</code>, offsets"]
+    n10 --> n11["Validar DH con simulación<br>Comparar pose analítica vs RViz"]
+    n11 --> n12["Armar/ajustar descripción del robot<br><code>URDF/XACRO</code> + mallas <code>.stl</code>"]
+    n12 --> n13["Configurar RViz<br><code>robot_state_publisher</code> + <code>/joint_states</code>"]
+    n13 --> n14["Configurar MoveIt 2<br>Planning group + límites + colisiones"]
+    n14 --> n15["Crear/validar Joint Controllers<br><code>waist</code>, <code>shoulder</code>, <code>elbow</code>, <code>wrist</code>, <code>gripper</code>"]
+    n15 --> n16["Implementar nodos de control (Python)<br>Publicadores + suscriptores + servicios"]
+    n16 --> n17["Implementar conversión unidades<br><code>dxl ↔ rad</code> + signos + offsets"]
+    n17 --> n18["Integrar Toolbox (Python)<br>FK y visualización 3D"]
+    n18 --> n19["Construir HMI (Tkinter)<br>Sliders + numérico + cartesiano + RViz"]
+    n19 --> n20["Definir 5 poses de prueba<br>q = (q1..q5)"]
+    n20 --> n21["Ejecutar pruebas (Real + RViz + Toolbox)<br>Verificar límites y colisiones"]
+    n21 --> n22{"¿Resultados coherentes<br>(pose/lecturas/visualización)?"}
+    n22 -- NO --> n23["Depurar: offsets, signos, límites, tópicos<br>Repetir pruebas"]
+    n23 --> n21
+    n22 -- SÍ --> n24["Capturar evidencias<br>Video poses + Video HMI + capturas RViz"]
+    n24 --> n25["Documentar en README.md<br>Setup + ejecución + diagramas + resultados"]
+    n25 --> n26(["Entrega final<br>Repo + código + videos + documentación"])
+
+    %% Paralelo: Gestión de hardware y comunicación (durante el proyecto)
+    n16 --- n30(["Bloque hardware<br>USB2Dynamixel + servos"])
+    n30 --> n31["Configurar puerto serial<br><code>/dev/ttyUSB*</code> y IDs"]
+    n31 --> n32{"¿Comunicación OK?"}
+    n32 -- NO --> n33["Diagnóstico: cable/puerto/IDs/baudrate<br>Reintentar"]
+    n33 --> n32
+    n32 -- SÍ --> n34["Habilitar torque<br>Servicios / configuración"]
+    n34 --> n21
+
+    %% Estilos (rombos + nodos redondeados)
+    style n6 shape:diamond
+    style n22 shape:diamond
+    style n32 shape:diamond
+    style n1, n26, n30 rx:100,ry:100
 ```
 
 ---
 
-## Diagrama de flujo de acciones del robot (Ejecución en tiempo real)
+## 🤖 Diagrama de flujo de acciones del robot (Ejecución en tiempo real) — estilo guía
 
 ```mermaid
-flowchart TD
-  %% ========== ENTRADAS ==========
-  subgraph UI[HMI / Operador]
-    UI0([Inicio / Usuario interactúa])
-    UI1[Seleccionar modo:\n1) Pose predefinida\n2) Sliders articulares\n3) Ingreso numérico\n4) Control cartesiano (TCP)]
-    UI2[Construir comando deseado:\nq* (5 ángulos) o (X,Y,Z,RPY)]
-    UIE[[Mostrar mensaje de error / advertencia]]
-  end
+---
+config:
+  theme: redux
+---
+flowchart TB
+    n1(["Inicio<br>HMI / Nodo Control"]) --> n2["Iniciar ROS 2<br><code>rclpy.init()</code>"]
+    n2 --> n3["Crear nodo de control<br><code>PincherController</code>"]
+    n3 --> n4["Crear publicadores<br><code>/joint_commands</code> (o comandos por junta)"]
+    n4 --> n5["Crear suscriptor<br><code>/joint_states</code>"]
+    n5 --> n6["Crear clientes de servicios<br><code>torque_enable</code>, <code>home</code>, etc."]
+    n6 --> n7["Esperar primera lectura<br><code>/joint_states</code>"]
+    n7 --> n8["Inicializar HMI<br>pestañas + sliders + validadores"]
+    n8 --> n9["Entrar a bucle principal<br>ROS spin + eventos HMI"]
 
-  %% ========== PROCESAMIENTO ==========
-  subgraph CTRL[Control en Python + ROS 2]
-    C0{{¿Modo cartesiano?}}
-    IK[Resolver cinemática inversa\n→ q* candidato]
-    LIM{{¿q* dentro de límites y seguro?}}
-    HOME{{¿Orden HOME / RESET?}}
-    TORQ{{¿Torque habilitado?}}
-    EN[Solicitar servicio torque_enable]
-    CONV[Convertir q*:\n(grados/radianes) → unidades Dynamixel\n+ offsets/signos]
-    SEQ[Publicar comandos secuenciales:\nwaist → shoulder → elbow → wrist → gripper\n(+ espera entre movimientos)]
-    READ[Suscribirse/leer estados:\n`/joint_states` y/o estados de controladores]
-    DEG[Convertir estados a grados:\nq_real (5 ángulos)]
-    FK[Calcular cinemática directa:\nTCP = (X,Y,Z) + (Roll,Pitch,Yaw)]
-    TOL{{¿Pose alcanzada (tolerancia)?}}
-  end
+    %% Paralelo: Eventos de la HMI (modo de operación)
+    n9 --- n20(["Bucle de eventos HMI<br>(paralelo)"])
 
-  %% ========== SISTEMA ROS / RVIZ ==========
-  subgraph ROS[ROS 2 + Visualización]
-    RSP[robot_state_publisher\n(publica TF con `joint_states`)]
-    RVIZ[RViz (modelo/TF/MoveIt)\nactualización en tiempo real]
-  end
+    %% Selección de modo
+    n20 --> n21["Usuario selecciona modo<br>1) Pose<br>2) Sliders<br>3) Numérico<br>4) Cartesiano"]
+    n21 --> n22["Construir objetivo<br><code>q*</code> o <code>(X,Y,Z,RPY)</code>"]
+    n22 --> n23{"¿Modo cartesiano?"}
+    n23 -- SÍ --> n24["Resolver IK<br>obtener <code>q*</code> candidato"]
+    n23 -- NO --> n26
 
-  %% ========== HARDWARE ==========
-  subgraph HW[Robot real: Dynamixel + USB2Dynamixel]
-    DXL[Servomotores ejecutan comandos]
-    ERR{{¿Error de comunicación / servo?}}
-  end
+    %% Validaciones comunes
+    n24 --> n26{"¿<code>q*</code> válido y dentro de límites?"}
+    n22 --> n26
+    n26 -- NO --> n27["Mostrar error en HMI<br>no enviar comando"]
+    n27 --> n21
+    n26 -- SÍ --> n28{"¿Torque habilitado?"}
 
-  %% ========== FLUJO ==========
-  UI0 --> UI1 --> UI2 --> C0
+    %% Torque
+    n28 -- NO --> n29["Llamar servicio<br><code>torque_enable</code>"]
+    n29 --> n28
+    n28 -- SÍ --> n30["Convertir unidades<br><code>grados/rad → dxl</code><br>+ offsets + signos"]
 
-  C0 -- Sí --> IK --> LIM
-  C0 -- No --> LIM
+    %% Publicación y movimiento secuencial
+    n30 --> n31["Publicar comandos secuenciales<br><code>waist→shoulder→elbow→wrist→gripper</code>"]
+    n31 --> n32["Esperar estabilización<br>(pausas cortas entre juntas)"]
+    n32 --> n33["Leer estado actual<br><code>/joint_states</code> → <code>q_real</code>"]
+    n33 --> n34["Calcular FK<br><code>TCP = (X,Y,Z,RPY)</code>"]
+    n34 --> n35["Actualizar visualización<br>HMI + RViz + Toolbox"]
+    n35 --> n36{"¿Pose alcanzada<br>(tolerancia)?"}
+    n36 -- NO --> n33
+    n36 -- SÍ --> n37["Registrar evidencia opcional<br>log/captura/estado"]
+    n37 --> n21
 
-  LIM -- No --> UIE --> UI1
-  LIM -- Sí --> HOME
+    %% Bloque RViz/Toolbox (paralelo lógico)
+    n35 --- n50(["Subsistema visualización<br>(paralelo)"])
+    n50 --> n51["Publicar TF / modelo<br><code>robot_state_publisher</code>"]
+    n51 --> n52["RViz actualiza robot<br>MoveIt (si aplica)"]
+    n52 --> n53["Toolbox 3D grafica<br>comparación digital"]
+    n53 --> n35
 
-  HOME -- Sí --> CONV
-  HOME -- No --> TORQ
+    %% Salida / cierre
+    n9 --> n10{"¿Se solicita cierre?"}
+    n10 -- SÍ --> n11["Cerrar HMI + destruir nodo<br><code>destroy_node()</code>"]
+    n11 --> n12["Cerrar ROS 2<br><code>rclpy.shutdown()</code>"]
+    n12 --> n13(["FIN"])
+    n10 -- NO --> n9
 
-  TORQ -- No --> EN --> TORQ
-  TORQ -- Sí --> CONV
-
-  CONV --> SEQ --> DXL --> ERR
-  ERR -- Sí --> UIE --> UI1
-  ERR -- No --> READ --> DEG --> FK --> RSP --> RVIZ --> TOL
-
-  TOL -- Sí --> UI1
-  TOL -- No --> READ
+    %% Estilos
+    style n10 shape:diamond
+    style n23 shape:diamond
+    style n26 shape:diamond
+    style n28 shape:diamond
+    style n36 shape:diamond
+    style n1, n13, n20, n50 rx:100,ry:100
 ```
-
