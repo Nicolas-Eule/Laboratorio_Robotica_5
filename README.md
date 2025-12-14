@@ -289,11 +289,30 @@ Este módulo adopta la nomenclatura de juntas (`waist`, `shoulder`, `elbow`, `wr
 
 Para validar el modelo, la configuración de MoveIt 2 y la implementación de los nodos de control, se ensayaron de forma sistemática las siguientes configuraciones articulares \((q_1, q_2, q_3, q_4, q_5)\) en grados:
 
-1. \(0, 0, 0, 0, 0\)  
-2. \(25, 25, 20, -20, 0\)  
-3. \(-35, 35, -30, 30, 0\)  
-4. \(85, -20, 55, 25, 0\)  
-5. \(80, -35, 55, -45, 0\)
+**1. \(0, 0, 0, 0, 0\)**
+
+![Pose1](https://github.com/user-attachments/assets/db8348e5-e9e6-4bac-8da8-fe9462bdd153)
+
+
+**2. \(25, 25, 20, -20, 0\)**
+
+![Pose2](https://github.com/user-attachments/assets/c8cdb9ee-9bbe-4f4e-9809-cb4c71f46fc4)
+
+
+**3. \(-35, 35, -30, 30, 0\)** 
+
+![Pose3](https://github.com/user-attachments/assets/05597f4c-348c-4e3a-aa0e-c2c9cfb726a0)
+
+
+**4. \(85, -20, 55, 25, 0\)**
+
+![Pose4](https://github.com/user-attachments/assets/b123fde6-3437-412a-94aa-b602d9d43e3b)
+
+
+**5. \(80, -35, 55, -45, 0\)**
+
+![Pose5](https://github.com/user-attachments/assets/ed907bb0-a2fc-4e53-ac47-1468798ed5dd)
+
 
 Cada una de estas poses se probó:
 
