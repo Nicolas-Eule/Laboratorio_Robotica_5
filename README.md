@@ -367,9 +367,6 @@ En conjunto, el desarrollo del laboratorio se apoya en los siguientes repositori
 - [`ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_Updated/guias/Moveit`](https://github.com/ElJoho/ROB_Intro_ROS2_Humble_Phantom_Pincher_X100_Updated/tree/jazzy/guias/Moveit)  
 - [`sergiosinlimites/robotica-proyecto-final/phantom_ws/src`](https://github.com/sergiosinlimites/robotica-proyecto-final/tree/main/phantom_ws/src)
 
-
----
-## Plano de planta de la ubicación de cada uno de los elementos
 ---
 ## Diagrama de flujo de acciones del robot utilizando la herramienta Mermaid
 
