@@ -131,6 +131,11 @@ A partir de las medidas definitivas se elaboró un diagrama esquemático análog
 ![Modelado3](https://github.com/user-attachments/assets/26b83f11-81bf-4ec7-a22c-73aa79f943fe)
 
 
+## PLANO DE PLANTA
+
+![Plano](https://github.com/user-attachments/assets/ced75d2d-51da-4465-929f-f250573580f3)
+
+
 
 ### Tabla de parámetros Denavit–Hartenberg del manipulador
 
@@ -391,7 +396,7 @@ En conjunto, el desarrollo del laboratorio se apoya en los siguientes repositori
 
 ---
 
-## 🔁 Diagrama de flujo completo del proyecto (Mermaid) — estilo guía
+## Diagrama de flujo completo del proyecto (Mermaid) — estilo guía
 
 ```mermaid
 ---
@@ -445,7 +450,7 @@ flowchart TB
 
 ---
 
-## 🤖 Diagrama de flujo de acciones del robot (Ejecución en tiempo real) — estilo guía
+## Diagrama de flujo de acciones del robot (Ejecución en tiempo real) — estilo guía
 
 ```mermaid
 ---
