@@ -317,7 +317,7 @@ Para validar el modelo, la configuración de MoveIt 2 y la implementación de lo
 
 **5. \(80, -35, 55, -45, 0\)**
 
-![Pose5](https://github.com/user-attachments/assets/ed907bb0-a2fc-4e53-ac47-1468798ed5dd)
+![Pose5](https://github.com/user-attachments/assets/be3f48df-c125-4e39-800b-ffc4f34bd1ab)
 
 
 Cada una de estas poses se probó:
