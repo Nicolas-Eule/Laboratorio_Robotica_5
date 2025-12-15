@@ -1,4 +1,4 @@
-![Valores](https://github.com/user-attachments/assets/79ecdee1-56bc-4688-b13d-70423e386bec)<!-- ✦✦✦ FUTURE IS AUTOMATED ✦✦✦ -->
+<!-- ✦✦✦ FUTURE IS AUTOMATED ✦✦✦ -->
 
 <div align="center">
 
