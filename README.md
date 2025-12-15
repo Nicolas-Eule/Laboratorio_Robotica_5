@@ -128,6 +128,9 @@ A partir de las medidas definitivas se elaboró un diagrama esquemático análog
 
 ![Modelado](https://github.com/user-attachments/assets/feb1e75e-651d-48e9-869d-ef925b694ff7)
 
+![Modelado3](https://github.com/user-attachments/assets/26b83f11-81bf-4ec7-a22c-73aa79f943fe)
+
+
 
 ### Tabla de parámetros Denavit–Hartenberg del manipulador
 
