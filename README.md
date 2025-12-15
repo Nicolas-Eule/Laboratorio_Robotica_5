@@ -124,20 +124,18 @@ En particular, se revisaron las carpetas asociadas al **Phantom X Pincher** y al
 A partir de las medidas definitivas se elaboró un diagrama esquemático análogo al de la Figura 2 de la guía, rotulando cada eslabón, su longitud efectiva y la posición relativa de las juntas.
 
 
-![Posicion_Home](https://github.com/user-attachments/assets/15f08f85-9d68-445b-8a68-e5012e64596a)
+## PLANO DE PLANTA
+
+![Plano](https://github.com/user-attachments/assets/ced75d2d-51da-4465-929f-f250573580f3)
 
 ![Modelado](https://github.com/user-attachments/assets/feb1e75e-651d-48e9-869d-ef925b694ff7)
 
 ![Modelado3](https://github.com/user-attachments/assets/26b83f11-81bf-4ec7-a22c-73aa79f943fe)
 
 
-## PLANO DE PLANTA
-
-![Plano](https://github.com/user-attachments/assets/ced75d2d-51da-4465-929f-f250573580f3)
-
-
-
 ### Tabla de parámetros Denavit–Hartenberg del manipulador
+
+![Posicion_Home](https://github.com/user-attachments/assets/15f08f85-9d68-445b-8a68-e5012e64596a)
 
 La siguiente tabla resume el modelo cinemático del brazo utilizado en el laboratorio, construido a partir de la posición HOME (eslabones verticales L₁, L₂, L₃ y L₄).  
 Los parámetros dᵢ y aᵢ se expresan en función de las longitudes medidas de cada eslabón, mientras que los ángulos αᵢ corresponden a la rotación entre los ejes zᵢ y zᵢ₊₁.  
