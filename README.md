@@ -1,4 +1,4 @@
-<!-- ✦✦✦ FUTURE IS AUTOMATED ✦✦✦ -->
+![Valores](https://github.com/user-attachments/assets/79ecdee1-56bc-4688-b13d-70423e386bec)<!-- ✦✦✦ FUTURE IS AUTOMATED ✦✦✦ -->
 
 <div align="center">
 
@@ -330,25 +330,40 @@ Cada una de estas poses se probó:
 
 La HMI desarrollada en el proyecto está fuertemente inspirada en la interfaz Tkinter descrita en la Guía 05 del repositorio de RViz, donde se propone una ventana con pestañas para:
 
-- Sliders de control en tiempo real.
-- Entrada numérica de comandos.
-- Lanzamiento y cierre de RViz desde botones dedicados.
+**- Sliders de control en tiempo real.**
+![Espacio_Tarea](https://github.com/user-attachments/assets/a794bbeb-0da7-4e22-bc14-d710ed1ec8e6)
+
+**- Entrada numérica de comandos.**
+![Valores](https://github.com/user-attachments/assets/78b34b55-1ae5-4e93-b9f5-a5d95ff75ee9)
+
+**- Lanzamiento y cierre de RViz desde botones dedicados.**
+  ![Visualiza_RViz](https://github.com/user-attachments/assets/af5bece2-fd10-49db-85b7-3497fc07153e)
+
+**- Control por poses predefinidas**
+![Pose](https://github.com/user-attachments/assets/8671dbe2-99cd-4ecc-b0d7-08a4d7cc0550)
+
+**- Espacio de Tarea**
+![Espacio_Tarea](https://github.com/user-attachments/assets/2755e76f-e426-418f-ae17-fb7d36ddf0e7)
+
+**-  Acerca de: (creditos)**
+![AcercaDe](https://github.com/user-attachments/assets/b62da5fa-67eb-4302-af07-9f92922fd393)
+
 
 Tomando como punto de partida esa estructura, la HMI del proyecto final (ubicada en `phantom_ws/src` de `robotica-proyecto-final`) se extendió para incluir:
 
 1. **Panel de identificación**  
    Muestra nombres, logos y datos de contacto de los integrantes del grupo, siguiendo la estética institucional del curso.
 
-2. **Visualización de la última posición enviada**  
+3. **Visualización de la última posición enviada**  
    Incluye una imagen/captura asociada a la última configuración enviada al robot (ya sea foto del manipulador o captura de RViz), utilizada también para documentar resultados.
 
-3. **Selección de poses predefinidas**  
+4. **Selección de poses predefinidas**  
    Botones que cargan directamente las cinco poses de prueba y envían los vectores articulares correspondientes al nodo de control, reutilizando la misma lógica que se describe en los scripts de `pincher_control`.
 
-4. **Lectura de ángulos articulares en tiempo real**  
+5. **Lectura de ángulos articulares en tiempo real**  
    Un panel numérico que muestra la lectura actual de cada junta a partir de `/joint_states`, sincronizada con el movimiento del robot.
 
-5. **Visualización de la posición actual**  
+6. **Visualización de la posición actual**  
    Un área gráfica que refleja la pose actual del manipulador, facilitando la comparación entre el comando enviado y la configuración realmente alcanzada.
 
 ### Funcionalidades de la interfaz gráfica
